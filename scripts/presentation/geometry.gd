@@ -1,6 +1,52 @@
 extends RefCounted
 ## Small shared primitive library. All generated meshes belong to their scene.
 
+static var _worn_cache: Dictionary = {}
+
+static func worn_material(color: Color, style: String = "paint", roughness: float = 0.88, metallic: float = 0.0) -> StandardMaterial3D:
+	var key := color.to_html() + style + str(roughness) + str(metallic)
+	if _worn_cache.has(key):
+		return _worn_cache[key]
+	var mat := material(Color.WHITE, roughness)
+	mat.metallic = metallic
+	# Keep the material grain small in world space rather than making large tiles.
+	var repeat_scale := 1.0
+	var contrast := 0.65
+	if style == "plaster":
+		repeat_scale = 8.0
+		contrast = 0.28
+	elif style == "paint":
+		repeat_scale = 4.0
+		contrast = 0.34
+	elif style == "metal":
+		repeat_scale = 3.0
+		contrast = 0.38
+	elif style == "wood":
+		repeat_scale = 2.0
+		contrast = 0.60
+	elif style in ["cloth", "skin"]:
+		repeat_scale = 2.0
+	mat.uv1_scale = Vector3(repeat_scale, repeat_scale, repeat_scale)
+	var image := Image.create(64, 64, false, Image.FORMAT_RGBA8)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77819 + style.hash()
+	for y in range(64):
+		for x in range(64):
+			var noise := rng.randf_range(-0.055, 0.045)
+			var grain := sin(float(x) * 0.77 + sin(float(y) * 0.18)) * 0.045 if style == "wood" else 0.0
+			var stain := sin(float(x) * 0.17) * cos(float(y) * 0.13) * 0.045
+			var wear := 0.0
+			if style == "metal" and ((x * 13 + y * 3) % 67 < 2):
+				wear = 0.14
+			if style == "paper" and (x < 3 or y < 3 or x > 60 or y > 60):
+				wear = -0.10
+			var delta := (noise + grain + stain + wear) * contrast
+			image.set_pixel(x, y, Color(clampf(color.r + delta, 0.02, 1), clampf(color.g + delta, 0.02, 1), clampf(color.b + delta, 0.02, 1), 1))
+	mat.albedo_texture = ImageTexture.create_from_image(image)
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	_worn_cache[key] = mat
+	return mat
+
 static func material(color: Color, roughness: float = 0.86) -> StandardMaterial3D:
 	var result := StandardMaterial3D.new()
 	result.albedo_color = color

@@ -37,18 +37,24 @@ func set_detail_picking(value: bool) -> void:
 		body.collision_layer = 2 if value else 0
 
 func _build() -> void:
-	var shell := G.material(Color("a7a38b"), 0.66)
-	var upper_shell := G.material(Color("c0bba1"), 0.59)
-	var dark := G.material(Color("50594f"), 0.52)
-	var metal := G.material(Color("8e9788"), 0.36)
-	var cloth := G.material(Color("d0c7ad"))
+	var shell := G.worn_material(Color("787e68"), "metal", 0.82, 0.45)
+	var upper_shell := G.worn_material(Color("96957a"), "metal", 0.79, 0.40)
+	var dark := G.worn_material(Color("39483b"), "metal", 0.76, 0.6)
+	var metal := G.worn_material(Color("7d8674"), "metal", 0.63, 0.65)
+	var cloth := G.worn_material(Color("ada88e"), "cloth")
 	var seam := G.material(Color("8a856d"))
-	var blue := G.material(Color("668d9f"))
+	var blue := G.worn_material(Color("4d7380"), "cloth")
 	G.box(self, Vector3(0.84, 0.075, 0.62), Vector3(0, 0.038, 0), shell)
 	G.box(self, Vector3(0.84, 0.17, 0.035), Vector3(0, 0.15, -0.29), shell)
 	G.box(self, Vector3(0.035, 0.18, 0.60), Vector3(-0.405, 0.15, 0), shell)
 	G.box(self, Vector3(0.035, 0.18, 0.60), Vector3(0.405, 0.15, 0), shell)
 	G.box(self, Vector3(0.84, 0.035, 0.035), Vector3(0, 0.09, 0.29), dark)
+	var exposed_steel := G.worn_material(Color("a09f83"), "metal", 0.84, 0.35)
+	var rust := G.worn_material(Color("66513b"), "metal", 0.96, 0.15)
+	for side in [-1.0, 1.0]:
+		for i in range(3):
+			G.box(self, Vector3(0.003, 0.012 + i * 0.003, 0.055 + i * 0.019), Vector3(side * 0.424, 0.10 + i * 0.032, -0.20 + i * 0.12), exposed_steel)
+		G.box(self, Vector3(0.004, 0.022, 0.10), Vector3(side * 0.424, 0.05, 0.17), rust)
 	# The grille has real spaces between rods, two hinges and a visible latch.
 	_door = Node3D.new()
 	_door.name = "GrilleDoor"

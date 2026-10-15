@@ -19,10 +19,10 @@ func _ready() -> void:
 	var environment := WorldEnvironment.new()
 	var settings := Environment.new()
 	settings.background_mode = Environment.BG_COLOR
-	settings.background_color = Color("1b2528")
+	settings.background_color = Color("141e18")
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	settings.ambient_light_color = Color("b3c3bb")
-	settings.ambient_light_energy = 0.65
+	settings.ambient_light_energy = 0.39
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)

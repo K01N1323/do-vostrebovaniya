@@ -1,5 +1,7 @@
 # Контракт прототипа — итерация 1
 
+Историческая версия 0.1. Правила состояния продолжают действовать; актуальные камера, помещение и интерфейс описаны в [контракте 0.2](iteration-02-contract.md).
+
 Единственный Autoload: `GameStore`. Весь изменяемый игровой прогресс хранится в нём; сцены получают глубокие копии.
 
 `GameStore.dispatch(command: Dictionary) -> Dictionary` возвращает `{ok: bool, error: String}`. Команда `{type: String, ...поля}`. После успешной команды сигнал `state_changed(snapshot: Dictionary)`, после отказа `command_rejected(reason: String)`.
