@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/presentation/room_view.gd" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/objects/package.tscn" id="2_package"]
+
+[node name="Room" type="Node3D"]
+script = ExtResource("1_room")
+
+[node name="Package" parent="." instance=ExtResource("2_package")]
+position = Vector3(-2.3, 1.2, -1.8)
