@@ -8,6 +8,8 @@ var store: Node
 var failures: Array[String] = []
 var output_dir: String
 var frames: Array[Dictionary] = []
+var art_sources: Dictionary = {"character": "", "material_pngs": [], "shaders": []}
+var _seen_materials: Dictionary = {}
 
 
 func _initialize() -> void:
@@ -20,13 +22,14 @@ func _run() -> void:
 		quit(1)
 		return
 	RenderingServer.viewport_set_update_mode(root.get_viewport_rid(), RenderingServer.VIEWPORT_UPDATE_ALWAYS)
-	output_dir = ProjectSettings.globalize_path("res://tools/preview-02")
+	output_dir = ProjectSettings.globalize_path("res://tools/preview-03")
 	DirAccess.make_dir_recursive_absolute(output_dir)
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	ui = main.get_node("Interface/GameUI")
 	room = main.get_node("Room")
 	store = root.get_node("GameStore")
+	_check_art_sources()
 	await _frame("01-title", 0.2)
 	var mute := _find(ui, "Играть без звука")
 	if is_instance_valid(mute):
@@ -45,10 +48,11 @@ func _run() -> void:
 		await _frame("05-greeting-next", 0.1)
 	ui._close_modal()
 	await _frame("06-workplace", 0.1)
+	await _composition_frames()
 	ui._show_document("identity")
 	await _frame("06b-identity", 0.15)
 	_check(ui._modal_kind == "document", "Single identity paper opens")
-	if ResourceLoader.exists("res://assets/characters/nina-v1.png"):
+	if ResourceLoader.exists("res://assets/characters/nina-v2.png"):
 		_check(is_instance_valid(ui.modal.find_child("IdentityPhoto", true, false)), "Identity paper includes Nina photo")
 	ui._close_modal()
 	await _click(_find(ui, "Сравнить обе бумаги"))
@@ -100,11 +104,12 @@ func _run() -> void:
 		ui._close_modal()
 		ui._focus("shelf" if decision == "retain" else "personal")
 		await _frame("20-" + decision + "-package", 0.45)
+	_check(frames.size() == 27, "All 23 workflow frames and four clean composition frames were saved")
 	var manifest := FileAccess.open(output_dir.path_join("manifest.json"), FileAccess.WRITE)
 	if manifest:
-		manifest.store_string(JSON.stringify({"frames": frames, "failures": failures}, "\t"))
+		manifest.store_string(JSON.stringify({"iteration": "0.3", "baseline_frames": 23, "composition_frames": 4, "art_sources": art_sources, "frames": frames, "failures": failures}, "\t"))
 	if failures.is_empty():
-		print("PASS: %d iteration 0.2 rendered previews and UI workflow checks. Inspect PNGs for visual quality." % frames.size())
+		print("PASS: %d iteration 0.3 rendered previews and UI workflow checks. Inspect PNGs for visual quality." % frames.size())
 	else:
 		for message in failures:
 			push_error(message)
@@ -125,7 +130,75 @@ func _frame(id: String, delay: float = 0.1) -> void:
 	var status := rendered.save_png(output_dir.path_join(id + ".png"))
 	_check(status == OK, id + ": PNG saved")
 	var camera: Camera3D = main.get_node("CameraRig").get_camera()
-	frames.append({"id": id, "visitor_phase": room.visitor_phase, "transfer_active": room.transfer_active, "hatch": room.get_hatch_state(), "eye": str(camera.global_position), "decision": store.get_snapshot().decision, "modal_kind": ui._modal_kind})
+	var state: Dictionary = store.get_snapshot()
+	frames.append({"id": id, "view": main.get_node("CameraRig").current_view, "visitor_phase": room.visitor_phase, "transfer_active": room.transfer_active, "hatch": room.get_hatch_state(), "eye": str(camera.global_position), "package_location": state.package.location, "package_opened": state.package.opened, "decision": state.decision, "modal_kind": ui._modal_kind})
+
+
+func _composition_frames() -> void:
+	ui._close_modal()
+	var before: Dictionary = store.get_snapshot().duplicate(true)
+	var action_panel := ui.get("_action_panel") as Control
+	var actions_were_visible: bool = is_instance_valid(action_panel) and action_panel.visible
+	for view in ["window", "shelf"]:
+		ui._focus(view)
+		if is_instance_valid(action_panel):
+			action_panel.hide()
+		await _frame("composition-01-window" if view == "window" else "composition-02-shelf", 0.45)
+	var response: Dictionary = store.dispatch({"type": "MOVE_PACKAGE", "destination": "desk"})
+	_check(response.get("ok", false), "Composition setup moves closed carrier to desk")
+	ui._focus("desk")
+	if is_instance_valid(action_panel):
+		action_panel.hide()
+	await _frame("composition-03-desk-closed", 0.45)
+	_check(store.get_snapshot().package.opened == false and not room.get_node("Package").opened, "Desk composition keeps carrier closed")
+	ui._focus("personal")
+	if is_instance_valid(action_panel):
+		action_panel.hide()
+	await _frame("composition-04-personal", 0.45)
+	store.dispatch({"type": "MOVE_PACKAGE", "destination": "shelf"})
+	ui._focus("window")
+	await create_timer(0.4).timeout
+	if is_instance_valid(action_panel):
+		action_panel.visible = actions_were_visible
+	_check(store.get_snapshot() == before, "Composition captures restore workflow state")
+
+
+func _check_art_sources() -> void:
+	var portrait := room.find_child("NinaPortrait", true, false) as Sprite3D
+	_check(is_instance_valid(portrait) and portrait.texture != null, "Nina uses a loaded portrait texture")
+	if is_instance_valid(portrait) and portrait.texture != null:
+		art_sources["character"] = portrait.texture.resource_path
+		_check(portrait.texture.resource_path == "res://assets/characters/nina-v2.png", "Room uses Nina v2 rather than the old portrait")
+	for node in room.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := node as MeshInstance3D
+		if mesh_instance.mesh == null:
+			continue
+		for surface in range(mesh_instance.mesh.get_surface_count()):
+			_record_material(mesh_instance.get_active_material(surface), true)
+	_check(not art_sources["material_pngs"].is_empty(), "Room materials actually reference PNG textures")
+	for node in main.find_children("*", "CanvasItem", true, false):
+		var canvas_item := node as CanvasItem
+		_record_material(canvas_item.material, false)
+
+
+func _record_material(material: Material, is_world: bool) -> void:
+	if material == null or _seen_materials.has(material.get_instance_id()):
+		return
+	_seen_materials[material.get_instance_id()] = true
+	if material is ShaderMaterial and material.shader != null:
+		var shader_path: String = material.shader.resource_path
+		if not shader_path.is_empty() and shader_path not in art_sources["shaders"]:
+			art_sources["shaders"].append(shader_path)
+	if not is_world:
+		return
+	for property in material.get_property_list():
+		if property.get("type") != TYPE_OBJECT:
+			continue
+		var value: Variant = material.get(property["name"])
+		if value is Texture2D:
+			var path: String = value.resource_path
+			if path.to_lower().ends_with(".png") and path not in art_sources["material_pngs"]:
+				art_sources["material_pngs"].append(path)
 
 
 func _wait_until(condition: Callable, timeout: float) -> bool:

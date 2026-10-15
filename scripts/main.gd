@@ -5,6 +5,10 @@ extends Node3D
 @onready var game_ui = $Interface/GameUI
 
 func _ready() -> void:
+	var film := CanvasLayer.new()
+	film.name = "FilmGrade"
+	film.set_script(preload("res://scripts/presentation/film_grade.gd"))
+	add_child(film)
 	GameStore.state_changed.connect(_on_state)
 	room.target_clicked.connect(game_ui.open_target)
 	room.visitor_arrived.connect(game_ui.on_visitor_arrived)

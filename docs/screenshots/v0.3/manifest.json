@@ -1,0 +1,425 @@
+{
+	"art_sources": {
+		"character": "res://assets/characters/nina-v2.png",
+		"material_pngs": [
+			"res://assets/materials/steel-painted-v1.png",
+			"res://assets/materials/plaster-worn-v1.png",
+			"res://assets/materials/walnut-worn-v1.png"
+		],
+		"shaders": [
+			"res://assets/shaders/worn_surface.gdshader",
+			"res://assets/shaders/film_grade.gdshader"
+		]
+	},
+	"baseline_frames": 23,
+	"composition_frames": 4,
+	"failures": [],
+	"frames": [
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "01-title",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "absent"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "02-preparing",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "arriving"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "03-arrival",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "arriving"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "04-greeting",
+			"modal_kind": "dialogue",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "05-greeting-next",
+			"modal_kind": "dialogue",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "06-workplace",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "composition-01-window",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "composition-02-shelf",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "shelf",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "composition-03-desk-closed",
+			"modal_kind": "",
+			"package_location": "desk",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "composition-04-personal",
+			"modal_kind": "",
+			"package_location": "desk",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "personal",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "06b-identity",
+			"modal_kind": "document",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "07-documents",
+			"modal_kind": "comparison",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "08-desk",
+			"modal_kind": "",
+			"package_location": "desk",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "09-inspection",
+			"modal_kind": "inspection",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "10-detail",
+			"modal_kind": "inspection",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "11-lunch-conversation",
+			"modal_kind": "dialogue",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "12-lunch-reply",
+			"modal_kind": "dialogue",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "13-decision",
+			"modal_kind": "decision",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": true,
+				"outer_open": false
+			},
+			"id": "14-handover-inner",
+			"modal_kind": "result",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": true,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": true
+			},
+			"id": "15-handover-outer",
+			"modal_kind": "result",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": true,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "16-reaction",
+			"modal_kind": "result",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "17-leaving",
+			"modal_kind": "result",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "leaving"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "18-gone",
+			"modal_kind": "",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "gone"
+		},
+		{
+			"decision": "retain",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "19-retain-reaction",
+			"modal_kind": "result",
+			"package_location": "shelf",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "shelf",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "retain",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "20-retain-package",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "shelf",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "appropriate",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "19-appropriate-reaction",
+			"modal_kind": "result",
+			"package_location": "personal",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "personal",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "appropriate",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "20-appropriate-package",
+			"modal_kind": "",
+			"package_location": "personal",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "personal",
+			"visitor_phase": "waiting"
+		}
+	],
+	"iteration": "0.3"
+}

@@ -3,49 +3,85 @@ extends RefCounted
 
 static var _worn_cache: Dictionary = {}
 
-static func worn_material(color: Color, style: String = "paint", roughness: float = 0.88, metallic: float = 0.0) -> StandardMaterial3D:
+static var _surface_textures: Dictionary = {}
+
+static func worn_material(color: Color, style: String = "paint", roughness: float = 0.88, metallic: float = 0.0) -> Material:
 	var key := color.to_html() + style + str(roughness) + str(metallic)
 	if _worn_cache.has(key):
 		return _worn_cache[key]
-	var mat := material(Color.WHITE, roughness)
-	mat.metallic = metallic
-	# Keep the material grain small in world space rather than making large tiles.
+	var mat := material(color, roughness)
+	mat.metallic = minf(metallic, 0.22) # The visible layer is worn paint, not polished metal.
+	mat.metallic_specular = 0.28
+	var texture_path := ""
 	var repeat_scale := 1.0
-	var contrast := 0.65
-	if style == "plaster":
-		repeat_scale = 8.0
-		contrast = 0.28
-	elif style == "paint":
-		repeat_scale = 4.0
-		contrast = 0.34
-	elif style == "metal":
-		repeat_scale = 3.0
-		contrast = 0.38
-	elif style == "wood":
-		repeat_scale = 2.0
-		contrast = 0.60
-	elif style in ["cloth", "skin"]:
-		repeat_scale = 2.0
-	mat.uv1_scale = Vector3(repeat_scale, repeat_scale, repeat_scale)
-	var image := Image.create(64, 64, false, Image.FORMAT_RGBA8)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 77819 + style.hash()
-	for y in range(64):
-		for x in range(64):
-			var noise := rng.randf_range(-0.055, 0.045)
-			var grain := sin(float(x) * 0.77 + sin(float(y) * 0.18)) * 0.045 if style == "wood" else 0.0
-			var stain := sin(float(x) * 0.17) * cos(float(y) * 0.13) * 0.045
-			var wear := 0.0
-			if style == "metal" and ((x * 13 + y * 3) % 67 < 2):
-				wear = 0.14
-			if style == "paper" and (x < 3 or y < 3 or x > 60 or y > 60):
-				wear = -0.10
-			var delta := (noise + grain + stain + wear) * contrast
-			image.set_pixel(x, y, Color(clampf(color.r + delta, 0.02, 1), clampf(color.g + delta, 0.02, 1), clampf(color.b + delta, 0.02, 1), 1))
-	mat.albedo_texture = ImageTexture.create_from_image(image)
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	var average := Color.WHITE
+	match style:
+		"plaster", "rust":
+			texture_path = "res://assets/materials/plaster-worn-v1.png"
+			repeat_scale = 0.42 if style == "plaster" else 2.0
+			average = Color(0.64, 0.60, 0.53)
+		"wood":
+			texture_path = "res://assets/materials/walnut-worn-v1.png"
+			repeat_scale = 0.72
+			average = Color(0.34, 0.26, 0.19)
+		"metal", "paint":
+			texture_path = "res://assets/materials/steel-painted-v1.png"
+			repeat_scale = 1.6 if style == "metal" else 0.8
+			average = Color(0.31, 0.31, 0.28)
+	if not texture_path.is_empty() and ResourceLoader.exists(texture_path):
+		if not _surface_textures.has(texture_path):
+			_surface_textures[texture_path] = load(texture_path)
+		var surface := ShaderMaterial.new()
+		surface.shader = preload("res://assets/shaders/worn_surface.gdshader")
+		surface.set_shader_parameter("surface_map", _surface_textures[texture_path])
+		surface.set_shader_parameter("tint", color)
+		surface.set_shader_parameter("map_average", average)
+		surface.set_shader_parameter("repeat_scale", repeat_scale)
+		surface.set_shader_parameter("detail_strength", 0.42 if style == "plaster" else (0.60 if style == "wood" else 0.48))
+		surface.set_shader_parameter("surface_roughness", roughness)
+		surface.set_shader_parameter("surface_metallic", minf(metallic, 0.18))
+		_worn_cache[key] = surface
+		return surface
+	else:
+		mat.albedo_texture = _fine_surface(style)
+		if style == "tile":
+			mat.roughness = 0.68
+			repeat_scale = 2.4
+		elif style == "cloth":
+			repeat_scale = 8.0
+		elif style == "leather":
+			repeat_scale = 5.0
+		else:
+			repeat_scale = 3.0
+	# Object-space projection keeps grain attached to moving packages, in metre units.
+	# It also avoids stretching one tiny bitmap over long thin cuboid faces.
+	mat.uv1_triplanar = true
+	mat.uv1_triplanar_sharpness = 8.0
+	mat.uv1_scale = Vector3.ONE * repeat_scale
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	_worn_cache[key] = mat
 	return mat
+
+static func _fine_surface(style: String) -> Texture2D:
+	if _surface_textures.has(style):
+		return _surface_textures[style]
+	var noise := FastNoiseLite.new()
+	noise.seed = 7813 + style.hash()
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.frequency = 0.045 if style == "tile" else 0.16
+	noise.fractal_octaves = 4
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(0.66, 0.64, 0.60))
+	gradient.set_color(1, Color(1.0, 0.99, 0.96))
+	var texture := NoiseTexture2D.new()
+	texture.width = 256
+	texture.height = 256
+	texture.seamless = true
+	texture.generate_mipmaps = true
+	texture.noise = noise
+	texture.color_ramp = gradient
+	_surface_textures[style] = texture
+	return texture
 
 static func material(color: Color, roughness: float = 0.86) -> StandardMaterial3D:
 	var result := StandardMaterial3D.new()
@@ -106,6 +142,7 @@ static func label(parent: Node3D, text: String, position: Vector3, font_size: in
 	result.font_size = font_size
 	result.pixel_size = 0.0025
 	result.modulate = color
+	result.shaded = true
 	result.outline_size = 0
 	result.position = position
 	parent.add_child(result)

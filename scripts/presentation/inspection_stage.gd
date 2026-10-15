@@ -1,6 +1,8 @@
 extends Node3D
 ## Instantiate this scene in an isolated SubViewport with own_world_3d = true.
 
+const G = preload("res://scripts/presentation/geometry.gd")
+
 signal detail_selected(detail_id: String)
 
 @export var input_enabled: bool = true
@@ -15,17 +17,18 @@ func _ready() -> void:
 	_package.set_opened(_pending_opened)
 	_package.set_detail_picking(true)
 	$Camera3D.current = true
-	$Camera3D.look_at(Vector3(0.12, 0.35, 0), Vector3.UP)
+	$Camera3D.look_at(Vector3(0.04, 0.31, -0.07), Vector3.UP)
 	var environment := WorldEnvironment.new()
 	var settings := Environment.new()
 	settings.background_mode = Environment.BG_COLOR
-	settings.background_color = Color("141e18")
+	settings.background_color = Color("1d211f")
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	settings.ambient_light_color = Color("b3c3bb")
-	settings.ambient_light_energy = 0.39
+	settings.ambient_light_color = Color("b3b7b1")
+	settings.ambient_light_energy = 0.30
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)
+	G.cylinder(self, 0.58, 0.018, Vector3(0, -0.016, 0), G.worn_material(Color("343832"), "plastic", 0.96))
 
 func set_item(_package_id: String = "P01") -> void:
 	set_opened(true)

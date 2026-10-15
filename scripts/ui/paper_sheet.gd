@@ -3,6 +3,7 @@ extends PanelContainer
 
 @export var paper_color := Color("d5c9a6")
 @export var grain_seed: int = 47
+@export var booklet := false
 
 func _ready() -> void:
 	var blank := StyleBoxEmpty.new()
@@ -16,8 +17,14 @@ func _ready() -> void:
 func _draw() -> void:
 	if size.x < 4 or size.y < 4:
 		return
+	if booklet:
+		draw_rect(Rect2(Vector2.ZERO,size),Color("494234"))
+		draw_rect(Rect2(Vector2(5,5),size-Vector2(10,10)),paper_color)
+		for i in range(7):
+			draw_line(Vector2(167+i,8),Vector2(167+i,size.y-8),Color(0.21,0.19,0.13,0.15-float(i)*0.018),1)
 	var outline := PackedVector2Array([Vector2(3,2),Vector2(size.x-17,0),Vector2(size.x,17),Vector2(size.x-2,size.y-5),Vector2(10,size.y),Vector2(0,size.y-11)])
-	draw_colored_polygon(outline,paper_color)
+	if not booklet:
+		draw_colored_polygon(outline,paper_color)
 	draw_polyline(PackedVector2Array([Vector2(size.x-17,0),Vector2(size.x-17,17),Vector2(size.x,17)]),Color("9c977b"),1)
 	draw_line(Vector2(10,7),Vector2(size.x-25,7),Color(0.3,0.29,0.22,0.15),1)
 	var rng := RandomNumberGenerator.new()

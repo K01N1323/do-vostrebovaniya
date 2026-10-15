@@ -10,7 +10,7 @@ const INK := Color("272c27")
 const LIGHT := Color("e1dac5")
 const MUTED := Color("a5aa98")
 const GOLD := Color("bdad78")
-const DARK := Color(0.075,0.10,0.085,0.96)
+const DARK := Color(0.035,0.043,0.037,0.91)
 
 var snapshot: Dictionary = {}
 var sidebar: VBoxContainer
@@ -59,9 +59,9 @@ func _build_theme() -> void:
 	for property in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color"]:
 		skin.set_color(property,"Button",LIGHT)
 	skin.set_color("font_disabled_color", "Button", Color("6f786a"))
-	skin.set_stylebox("normal","Button",_style(Color("202b25"),Color("65705a")))
-	skin.set_stylebox("hover","Button",_style(Color("354238"),GOLD))
-	skin.set_stylebox("pressed","Button",_style(Color("48513b"),GOLD))
+	skin.set_stylebox("normal","Button",_style(Color(0.07,0.085,0.07,0.65),Color(0.52,0.54,0.45,0.40)))
+	skin.set_stylebox("hover","Button",_style(Color("30372b"),GOLD))
+	skin.set_stylebox("pressed","Button",_style(Color("474b38"),GOLD))
 	skin.set_stylebox("disabled","Button",_style(Color("1e2722"),Color("3d483b")))
 	skin.set_stylebox("focus","Button",_style(Color(0,0,0,0),GOLD,2))
 	skin.set_constant("separation","VBoxContainer",9)
@@ -103,7 +103,7 @@ func _build_shell() -> void:
 	sidebar = VBoxContainer.new()
 	sidebar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(sidebar)
-	var footer := _panel(_hud,Color(0.04,0.07,0.06,0.86))
+	var footer := _panel(_hud,Color(0.02,0.025,0.02,0.52))
 	footer.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	footer.offset_top = -62
 	var nav := HBoxContainer.new()
@@ -200,6 +200,9 @@ func _show_document(id: String) -> void:
 	if not GameStore.dispatch({"type":"READ_DOCUMENT","document_id":id}).ok:
 		return
 	_begin_modal(GameStore.content.documents[id].title,"document")
+	if id == "identity":
+		modal.position = Vector2(36,250)
+		modal.size = Vector2(580,520)
 	_document(modal_body,GameStore.content.documents[id],id)
 	_button(modal_body,"Вернуться к столу",_close_modal)
 
@@ -215,6 +218,9 @@ func _show_comparison() -> void:
 	_button(modal_body,"Вернуться к столу",_close_modal)
 
 func _document(parent: Node, record: Dictionary, id: String) -> void:
+	if id == "identity" and _modal_kind != "comparison":
+		_identity_booklet(parent,record)
+		return
 	var page := Paper.new()
 	page.name = "Paper_"+id
 	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -230,18 +236,6 @@ func _document(parent: Node, record: Dictionary, id: String) -> void:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_label(head,"15 / X",14,Color("65644e"))
 	_rule(stack)
-	if id == "identity" and _modal_kind != "comparison" and ResourceLoader.exists("res://assets/characters/nina-v1.png"):
-		var photo := TextureRect.new()
-		photo.name = "IdentityPhoto"
-		var source: Texture2D = load("res://assets/characters/nina-v1.png")
-		var atlas := AtlasTexture.new()
-		atlas.atlas = source
-		atlas.region = Rect2(source.get_width()*0.24,source.get_height()*0.02,source.get_width()*0.52,source.get_height()*0.27)
-		photo.texture = atlas
-		photo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		photo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		photo.custom_minimum_size = Vector2(74,92)
-		head.add_child(photo)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -253,6 +247,51 @@ func _document(parent: Node, record: Dictionary, id: String) -> void:
 	var seal := _label(stack,"БЮРО НАХОДОК  ·  ПРИНЯТО" if id == "claim" else "ХОЗЯЙСТВЕННАЯ СЛУЖБА",12,Color("704f42"))
 	seal.add_theme_font_override("font",_typewriter_font)
 	seal.rotation = -0.018
+
+func _identity_booklet(parent: Node, record: Dictionary) -> void:
+	var page := Paper.new()
+	page.name = "Paper_identity"
+	page.booklet = true
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	parent.add_child(page)
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation",24)
+	page.add_child(columns)
+	var portrait_column := VBoxContainer.new()
+	portrait_column.custom_minimum_size.x = 138
+	columns.add_child(portrait_column)
+	_label(portrait_column,"АВТОВОКЗАЛ",14,INK).add_theme_font_override("font",_typewriter_font)
+	var backing := _panel(portrait_column,Color("8c8c7a"))
+	var photo := TextureRect.new()
+	photo.name = "IdentityPhoto"
+	var source: Texture2D = load("res://assets/characters/nina-v2.png")
+	var atlas := AtlasTexture.new()
+	atlas.atlas = source
+	atlas.region = Rect2(source.get_width()*0.32,source.get_height()*0.025,source.get_width()*0.39,source.get_height()*0.29)
+	photo.texture = atlas
+	photo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	photo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	photo.custom_minimum_size = Vector2(118,150)
+	photo.modulate = Color("d6d0b7")
+	backing.add_child(photo)
+	_label(portrait_column,"ТАБЕЛЬНЫЙ
+№ 047",16,INK).add_theme_font_override("font",_typewriter_font)
+	var seal := _label(portrait_column,"ХОЗ. СЛУЖБА
+• АВТОВОКЗАЛ •",12,Color("73564b"))
+	seal.rotation = -0.035
+	var right := VBoxContainer.new()
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.add_child(right)
+	_label(right,"УДОСТОВЕРЕНИЕ",17,INK).add_theme_font_override("font",_typewriter_font)
+	_rule(right)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	right.add_child(scroll)
+	var body := _text(scroll,record.text,16,INK)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_theme_font_override("normal_font",_typewriter_font)
 
 func _show_inspection() -> void:
 	_close_modal()
@@ -347,12 +386,12 @@ func _refresh_speech() -> void:
 	dialogue_text.text = _speech_parts[_speech_index]
 	_clear(_speech_choices)
 	if _speech_index < _speech_parts.size()-1:
-		modal.size.y = 240
-		modal.position.y = 580
+		modal.size.y = 215
+		modal.position.y = 605
 		_button(_speech_choices,"Далее",func(): _speech_index+=1; _refresh_speech())
 		return
-	modal.size.y = 285
-	modal.position.y = 535
+	modal.size.y = 260
+	modal.position.y = 560
 	var topics := HBoxContainer.new()
 	_speech_choices.add_child(topics)
 	for entry in [["carrier","Почему кошачья переноска?"],["old_room","Что разбирают в старой комнате?"],["lunch","Вы приготовили обед на троих?"]]:
@@ -398,15 +437,15 @@ func _decide(type: String) -> void:
 
 func _make_start_screen() -> Control:
 	var screen := ColorRect.new()
-	screen.color = Color(0.025,0.045,0.035,0.88)
+	screen.color = Color(0.015,0.022,0.020,0.48)
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(screen)
-	var rules := _panel(screen,Color(0.10,0.14,0.105,0.74))
+	var rules := _panel(screen,Color(0.035,0.043,0.035,0.88))
 	rules.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	rules.offset_left = 68
-	rules.offset_right = -68
-	rules.offset_top = 62
-	rules.offset_bottom = -62
+	rules.offset_right = -580
+	rules.offset_top = 100
+	rules.offset_bottom = -100
 	var content := VBoxContainer.new()
 	rules.add_child(_margin(content,52,38))
 	_label(content,"СТАРЫЙ АВТОВОКЗАЛ   /   СЛУЖБА ХРАНЕНИЯ",15,GOLD)
@@ -424,7 +463,7 @@ func _make_start_screen() -> Control:
 	var exit_button := _button(content,"Выйти",func(): get_tree().quit())
 	exit_button.custom_minimum_size.x = 360
 	exit_button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	var settings := HBoxContainer.new()
+	var settings := VBoxContainer.new()
 	content.add_child(settings)
 	var mute := CheckButton.new()
 	mute.text = "Играть без звука"
@@ -436,7 +475,8 @@ func _make_start_screen() -> Control:
 	motion.button_pressed = _reduced
 	motion.toggled.connect(func(value: bool): _reduced=value; motion_changed.emit(value))
 	settings.add_child(motion)
-	_menu_status = _label(content,"Мышь — предметы  ·  ПКМ — осмотреться  ·  Escape — пауза",15,MUTED)
+	_menu_status = _label(content,"Мышь — предметы  ·  ПКМ — осмотреться
+Escape — пауза",15,MUTED)
 	_label(content,"БЮРО № 4                        15 ОКТЯБРЯ 2026",13,GOLD).add_theme_font_override("font",_typewriter_font)
 	return screen
 
@@ -497,8 +537,9 @@ func _return_to_title() -> void:
 func _begin_modal(title: String, kind: String) -> void:
 	_close_modal()
 	_modal_kind = kind
+	hint.hide()
 	_action_panel.hide()
-	modal = _panel(self,DARK)
+	modal = _panel(self,Color(0.025,0.035,0.028,0.83) if kind in ["dialogue","result"] else DARK)
 	modal.name = "ContentPanel"
 	var rect: Rect2
 	match kind:
@@ -507,7 +548,7 @@ func _begin_modal(title: String, kind: String) -> void:
 		"document": rect = Rect2(36,118,555,680)
 		"comparison": rect = Rect2(36,500,1100,320)
 		"inspection": rect = Rect2(36,240,990,580)
-		"decision": rect = Rect2(670,470,730,350)
+		"decision": rect = Rect2(670,530,730,290)
 		_: rect = Rect2(410,190,620,560)
 	modal.position = rect.position
 	modal.size = rect.size
@@ -529,6 +570,7 @@ func _close_modal() -> void:
 		modal.queue_free()
 	modal = null
 	_modal_kind = ""
+	hint.show()
 	if is_instance_valid(_action_panel) and snapshot.get("started",false):
 		_action_panel.show()
 	modal_changed.emit(false)
@@ -620,7 +662,10 @@ func _action(parent: Node, text_value: String, callback: Callable) -> Button:
 func _rule(parent: Node) -> void:
 	var line := HSeparator.new()
 	line.custom_minimum_size.y = 2
-	line.add_theme_stylebox_override("separator",_style(Color("66705a"),Color(0,0,0,0),0))
+	var stroke := StyleBoxLine.new()
+	stroke.color = Color(0.51,0.54,0.44,0.38)
+	stroke.thickness = 1
+	line.add_theme_stylebox_override("separator",stroke)
 	parent.add_child(line)
 
 func _panel(parent: Node, color: Color) -> PanelContainer:
