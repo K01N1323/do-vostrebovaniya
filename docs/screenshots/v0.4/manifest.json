@@ -1,0 +1,546 @@
+{
+	"art_sources": {
+		"character": "res://assets/characters/nina-v2.png",
+		"material_pngs": [
+			"res://assets/materials/steel-painted-v1.png",
+			"res://assets/materials/plaster-worn-v1.png",
+			"res://assets/materials/walnut-worn-v1.png"
+		],
+		"shaders": [
+			"res://assets/shaders/worn_surface.gdshader",
+			"res://assets/shaders/film_grade.gdshader"
+		]
+	},
+	"baseline_frames": 23,
+	"composition_frames": 4,
+	"failures": [],
+	"frames": [
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "01-title",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "absent"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "02-preparing",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "arriving"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "03-arrival",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "arriving"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "04-greeting",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "dialogue",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "05-greeting-next",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "dialogue",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "06-workplace",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "composition-01-window",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "composition-02-shelf",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "shelf",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "composition-03-desk-closed",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "desk",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "composition-04-personal",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "desk",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "personal",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "06b-identity",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "document",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "07-documents",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "comparison",
+			"package_location": "shelf",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "08-desk",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "desk",
+			"package_opened": false,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "09-inspection",
+			"inspection_camera": {
+				"fov": 38.0,
+				"transform": "[X: (0.999921, 0.0, 0.012578), Y: (0.006648, 0.848916, -0.528487), Z: (-0.010677, 0.528528, 0.848848), O: (0.02, 1.3, 1.52)]"
+			},
+			"inspection_focus": "",
+			"modal_kind": "inspection",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "10-detail",
+			"inspection_camera": {
+				"fov": 35.0,
+				"transform": "[X: (0.996448, 0.0, -0.084207), Y: (-0.053705, 0.770225, -0.635507), Z: (0.064858, 0.637773, 0.767489), O: (0.1, 0.76, 0.7)]"
+			},
+			"inspection_focus": "sandwiches",
+			"modal_kind": "inspection",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "10b-saucer-close",
+			"inspection_camera": {
+				"fov": 35.0,
+				"transform": "[X: (0.955779, 0.0, -0.294086), Y: (-0.18322, 0.782209, -0.595466), Z: (0.230037, 0.623016, 0.747619), O: (0.31, 0.46, 0.57)]"
+			},
+			"inspection_focus": "saucer",
+			"modal_kind": "inspection",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "10c-napkin-close",
+			"inspection_camera": {
+				"fov": 36.0,
+				"transform": "[X: (0.952424, 0.0, 0.304776), Y: (0.200856, 0.752118, -0.627675), Z: (-0.229227, 0.659029, 0.716335), O: (-0.37, 0.33, 0.43)]"
+			},
+			"inspection_focus": "napkin",
+			"modal_kind": "inspection",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "10d-inspection-reset",
+			"inspection_camera": {
+				"fov": 38.0,
+				"transform": "[X: (0.999921, 0.0, 0.012578), Y: (0.006648, 0.848916, -0.528487), Z: (-0.010677, 0.528528, 0.848848), O: (0.02, 1.3, 1.52)]"
+			},
+			"inspection_focus": "",
+			"modal_kind": "inspection",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "desk",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "11-lunch-conversation",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "dialogue",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "12-lunch-reply",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "dialogue",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "13-decision",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "decision",
+			"package_location": "desk",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": true,
+				"outer_open": false
+			},
+			"id": "14-handover-inner",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "result",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": true,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": true
+			},
+			"id": "15-handover-outer",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "result",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": true,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "16-reaction",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "result",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "17-leaving",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "result",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "leaving"
+		},
+		{
+			"decision": "issue",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "18-gone",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "issued",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "window",
+			"visitor_phase": "gone"
+		},
+		{
+			"decision": "retain",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "19-retain-reaction",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "result",
+			"package_location": "shelf",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "shelf",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "retain",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "20-retain-package",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "shelf",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "shelf",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "appropriate",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "19-appropriate-reaction",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "result",
+			"package_location": "personal",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "personal",
+			"visitor_phase": "waiting"
+		},
+		{
+			"decision": "appropriate",
+			"eye": "(0.0, 1.62, 1.25)",
+			"hatch": {
+				"inner_open": false,
+				"outer_open": false
+			},
+			"id": "20-appropriate-package",
+			"inspection_camera": {},
+			"inspection_focus": "",
+			"modal_kind": "",
+			"package_location": "personal",
+			"package_opened": true,
+			"transfer_active": false,
+			"view": "personal",
+			"visitor_phase": "waiting"
+		}
+	],
+	"inspection_extra_frames": 3,
+	"iteration": "0.4"
+}

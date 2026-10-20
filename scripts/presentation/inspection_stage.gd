@@ -4,11 +4,22 @@ extends Node3D
 const G = preload("res://scripts/presentation/geometry.gd")
 
 signal detail_selected(detail_id: String)
+signal focus_changed(detail_id: String)
+
+const DETAIL_VIEWS := {
+	"sandwiches": {"eye": Vector3(0.10, 0.76, 0.70), "at": Vector3(0.04, 0.17, -0.01), "fov": 35.0},
+	"saucer": {"eye": Vector3(0.31, 0.46, 0.57), "at": Vector3(0.19, 0.135, 0.18), "fov": 35.0},
+	"napkin": {"eye": Vector3(-0.37, 0.33, 0.43), "at": Vector3(-0.29, 0.10, 0.18), "fov": 36.0}
+}
 
 @export var input_enabled: bool = true
 @export var reduced_motion: bool = false
 var _turn: Tween
 var _pending_opened: bool = true
+var _focus_id := ""
+var _focus_tween: Tween
+var _overview: Transform3D
+var _overview_fov: float
 
 @onready var _pivot: Node3D = $Pivot
 @onready var _package: Node3D = $Pivot/Package
@@ -18,6 +29,8 @@ func _ready() -> void:
 	_package.set_detail_picking(true)
 	$Camera3D.current = true
 	$Camera3D.look_at(Vector3(0.04, 0.31, -0.07), Vector3.UP)
+	_overview = $Camera3D.transform
+	_overview_fov = $Camera3D.fov
 	var environment := WorldEnvironment.new()
 	var settings := Environment.new()
 	settings.background_mode = Environment.BG_COLOR
@@ -41,9 +54,48 @@ func set_opened(value: bool) -> void:
 func set_input_enabled(value: bool) -> void:
 	input_enabled = value
 
+func get_focus_id() -> String:
+	return _focus_id
+
+func focus_detail(detail_id: String) -> void:
+	if not is_node_ready() or not DETAIL_VIEWS.has(detail_id):
+		return
+	if is_instance_valid(_turn):
+		_turn.kill()
+	var view: Dictionary = DETAIL_VIEWS[detail_id]
+	var destination := Transform3D(Basis.IDENTITY, view.eye).looking_at(view.at, Vector3.UP)
+	_focus_id = detail_id
+	_transition_camera(destination, float(view.fov), true)
+	focus_changed.emit(_focus_id)
+
+func reset_focus() -> void:
+	if not is_node_ready():
+		return
+	_focus_id = ""
+	_transition_camera(_overview, _overview_fov, false)
+	focus_changed.emit(_focus_id)
+
+func _transition_camera(destination: Transform3D, field_of_view: float, straighten_item: bool) -> void:
+	if is_instance_valid(_focus_tween):
+		_focus_tween.kill()
+	if reduced_motion:
+		$Camera3D.transform = destination
+		$Camera3D.fov = field_of_view
+		if straighten_item:
+			_pivot.rotation.y = 0.0
+		return
+	_focus_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	_focus_tween.tween_property($Camera3D, "transform", destination, 0.32)
+	_focus_tween.tween_property($Camera3D, "fov", field_of_view, 0.32)
+	if straighten_item:
+		_focus_tween.tween_property(_pivot, "rotation:y", 0.0, 0.32)
+
 func rotate_item(direction: float) -> void:
 	if not is_node_ready():
 		return
+	# Rotation is always made from the overview; close-ups remain framed on their target.
+	if not _focus_id.is_empty():
+		reset_focus()
 	if is_instance_valid(_turn):
 		_turn.kill()
 	var angle := _pivot.rotation.y + direction * PI / 6.0

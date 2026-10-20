@@ -22,7 +22,7 @@ func _run() -> void:
 		quit(1)
 		return
 	RenderingServer.viewport_set_update_mode(root.get_viewport_rid(), RenderingServer.VIEWPORT_UPDATE_ALWAYS)
-	output_dir = ProjectSettings.globalize_path("res://tools/preview-03")
+	output_dir = ProjectSettings.globalize_path("res://tools/preview-04")
 	DirAccess.make_dir_recursive_absolute(output_dir)
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
@@ -64,9 +64,7 @@ func _run() -> void:
 	await _click(_find(ui, "Открыть и осмотреть"))
 	await _frame("09-inspection", 0.15)
 	_check(ui._modal_kind == "inspection", "Inspection panel opens")
-	await _click(_find(ui.modal, "Три бутерброда"))
-	await _frame("10-detail", 0.1)
-	_check("sandwiches" in store.get_snapshot().inspected_details, "Detail button records observation")
+	await _inspection_focus_frames()
 	ui._close_modal()
 	ui._show_conversation()
 	await _frame("11-lunch-conversation", 0.45)
@@ -104,12 +102,12 @@ func _run() -> void:
 		ui._close_modal()
 		ui._focus("shelf" if decision == "retain" else "personal")
 		await _frame("20-" + decision + "-package", 0.45)
-	_check(frames.size() == 27, "All 23 workflow frames and four clean composition frames were saved")
+	_check(frames.size() == 30, "All 27 baseline frames and three inspection focus/reset frames were saved")
 	var manifest := FileAccess.open(output_dir.path_join("manifest.json"), FileAccess.WRITE)
 	if manifest:
-		manifest.store_string(JSON.stringify({"iteration": "0.3", "baseline_frames": 23, "composition_frames": 4, "art_sources": art_sources, "frames": frames, "failures": failures}, "\t"))
+		manifest.store_string(JSON.stringify({"iteration": "0.4", "baseline_frames": 23, "composition_frames": 4, "inspection_extra_frames": 3, "art_sources": art_sources, "frames": frames, "failures": failures}, "\t"))
 	if failures.is_empty():
-		print("PASS: %d iteration 0.3 rendered previews and UI workflow checks. Inspect PNGs for visual quality." % frames.size())
+		print("PASS: %d iteration 0.4 rendered previews and UI workflow checks. Inspect PNGs for visual quality." % frames.size())
 	else:
 		for message in failures:
 			push_error(message)
@@ -131,7 +129,40 @@ func _frame(id: String, delay: float = 0.1) -> void:
 	_check(status == OK, id + ": PNG saved")
 	var camera: Camera3D = main.get_node("CameraRig").get_camera()
 	var state: Dictionary = store.get_snapshot()
-	frames.append({"id": id, "view": main.get_node("CameraRig").current_view, "visitor_phase": room.visitor_phase, "transfer_active": room.transfer_active, "hatch": room.get_hatch_state(), "eye": str(camera.global_position), "package_location": state.package.location, "package_opened": state.package.opened, "decision": state.decision, "modal_kind": ui._modal_kind})
+	var inspection: Variant = ui.get("_inspection")
+	var focus_id := ""
+	var inspection_camera: Dictionary = {}
+	if is_instance_valid(inspection) and inspection.is_inside_tree() and inspection.has_method("get_focus_id"):
+		focus_id = str(inspection.call("get_focus_id"))
+		var detail_camera := inspection.get_node_or_null("Camera3D") as Camera3D
+		if is_instance_valid(detail_camera):
+			inspection_camera = {"transform": str(detail_camera.transform), "fov": detail_camera.fov}
+	frames.append({"id": id, "view": main.get_node("CameraRig").current_view, "visitor_phase": room.visitor_phase, "transfer_active": room.transfer_active, "hatch": room.get_hatch_state(), "eye": str(camera.global_position), "package_location": state.package.location, "package_opened": state.package.opened, "decision": state.decision, "modal_kind": ui._modal_kind, "inspection_focus": focus_id, "inspection_camera": inspection_camera})
+
+
+func _inspection_focus_frames() -> void:
+	var stage: Node = ui.get("_inspection")
+	var has_api: bool = is_instance_valid(stage) and stage.has_method("focus_detail") and stage.has_method("reset_focus") and stage.has_method("get_focus_id")
+	_check(has_api, "Inspection close-up API is available")
+	if not has_api:
+		return
+	var camera := stage.get_node_or_null("Camera3D") as Camera3D
+	_check(is_instance_valid(camera), "Inspection camera is available")
+	if not is_instance_valid(camera):
+		return
+	var overview: Transform3D = camera.transform
+	var overview_fov: float = camera.fov
+	_check(stage.call("get_focus_id") == "", "Inspection starts with the entire carrier")
+	for detail in [["sandwiches", "Три бутерброда", "10-detail"], ["saucer", "Край блюдца", "10b-saucer-close"], ["napkin", "Голубая заплата", "10c-napkin-close"]]:
+		await _click(_find(ui.modal, detail[1]))
+		await _frame(detail[2], 0.45)
+		_check(stage.call("get_focus_id") == detail[0], "Detail button focuses " + detail[0])
+		_check(detail[0] in store.get_snapshot().inspected_details, "Detail button records " + detail[0])
+		_check(not camera.transform.is_equal_approx(overview) or not is_equal_approx(camera.fov, overview_fov), "Detail camera differs from overview for " + detail[0])
+	await _click(_find(ui.modal, "Вся переноска"))
+	await _frame("10d-inspection-reset", 0.45)
+	_check(stage.call("get_focus_id") == "", "Reset button restores entire carrier focus")
+	_check(camera.transform.is_equal_approx(overview) and is_equal_approx(camera.fov, overview_fov), "Reset button restores overview camera and FOV")
 
 
 func _composition_frames() -> void:

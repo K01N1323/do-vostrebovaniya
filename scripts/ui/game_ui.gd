@@ -26,6 +26,9 @@ var _muted := false
 var _reduced := false
 var _inspection: Node3D
 var _detail_buttons: Dictionary = {}
+var _inspection_caption: Label
+var _inspection_overview: Button
+var _inspection_turns: Array[Button] = []
 var _start_screen: Control
 var _action_panel: PanelContainer
 var _hud: Control
@@ -322,10 +325,20 @@ func _show_inspection() -> void:
 	_inspection.set_opened(true)
 	_inspection.reduced_motion = _reduced
 	_inspection.detail_selected.connect(_inspect_detail)
+	_inspection.focus_changed.connect(_refresh_inspection_focus)
+	_inspection_caption = _label(left,"П01 · Общий вид",14,MUTED)
+	_inspection_caption.name = "InspectionCaption"
 	var turn := HBoxContainer.new()
 	left.add_child(turn)
-	_button(turn,"Повернуть влево",func(): _inspection.rotate_item(-1.0))
-	_button(turn,"Повернуть вправо",func(): _inspection.rotate_item(1.0))
+	_inspection_turns.clear()
+	_inspection_turns.append(_button(turn,"↶ Влево",func(): _inspection.rotate_item(-1.0)))
+	_inspection_turns.append(_button(turn,"Вправо ↷",func(): _inspection.rotate_item(1.0)))
+	_inspection_overview = _button(turn,"Вся переноска",func(): _inspection.reset_focus())
+	_inspection_overview.name = "InspectionOverview"
+	_inspection_overview.disabled = true
+	for button in _inspection_turns + [_inspection_overview]:
+		button.add_theme_font_size_override("font_size",16)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(right)
@@ -334,7 +347,7 @@ func _show_inspection() -> void:
 	for id in ["sandwiches","saucer","napkin"]:
 		var detail_id: String = id
 		_detail_buttons[id] = _button(right,GameStore.content.details[id].title+(" ✓" if id in snapshot.inspected_details else ""),func(): _inspect_detail(detail_id))
-	var observation := _text(right,"Выберите деталь. Наблюдения останутся в памяти после осмотра.",18)
+	var observation := _text(right,"Выберите предмет на изображении или признак справа, чтобы рассмотреть его ближе. Наблюдения сохранятся после осмотра.",18)
 	observation.name = "Observation"
 	observation.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_button(modal_body,"Закончить осмотр · Esc",_close_modal)
@@ -348,7 +361,18 @@ func _inspect_detail(id: String) -> void:
 			observation.text = GameStore.content.details[id].text
 	if is_instance_valid(_detail_buttons.get(id)):
 		_detail_buttons[id].text = GameStore.content.details[id].title+" ✓"
+	if is_instance_valid(_inspection) and _inspection.is_inside_tree() and _modal_kind == "inspection":
+		_inspection.focus_detail(id)
 	_show_hint("Осмотрено: "+GameStore.content.details[id].title)
+
+func _refresh_inspection_focus(id: String) -> void:
+	if is_instance_valid(_inspection_caption):
+		_inspection_caption.text = "П01 · Общий вид" if id.is_empty() else "Крупный план · " + GameStore.content.details[id].title
+	if is_instance_valid(_inspection_overview):
+		_inspection_overview.disabled = id.is_empty()
+	for button in _inspection_turns:
+		if is_instance_valid(button):
+			button.disabled = not id.is_empty()
 
 func _show_conversation() -> void:
 	if snapshot.get("case_status","") != "active":
