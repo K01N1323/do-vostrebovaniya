@@ -3,10 +3,10 @@ config_version=5
 
 [application]
 config/name="До востребования"
-config/version="0.6.0"
+config/version="0.7.0"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/description="Бюро находок старого автовокзала. Обращения Нины и Фёдора."
+config/description="Бюро находок старого автовокзала. Обращения Нины, Фёдора и Мельниковых."
 
 [autoload]
 GameStore="*res://scripts/core/game_store.gd"

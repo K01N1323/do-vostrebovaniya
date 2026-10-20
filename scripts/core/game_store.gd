@@ -31,13 +31,18 @@ func dispatch(command: Dictionary) -> Dictionary:
 func get_snapshot() -> Dictionary:
 	return _state.duplicate(true)
 
+func get_case_content(case_id: String) -> Dictionary:
+	return _catalog.get(case_id, {}).duplicate(true)
+
 func _valid_content(value: Dictionary, case_id: String = "nina") -> bool:
 	var definition: Dictionary = Cases.get_case(case_id)
-	for group in ["documents", "details", "dialogues", "reactions", "presentation", "topic_labels"]:
+	for group in ["documents", "document_labels", "details", "dialogues", "reactions", "presentation", "topic_labels"]:
 		if not value.get(group) is Dictionary:
 			return false
-	for id in Reducer.DOCUMENT_IDS:
+	for id in definition.documents:
 		if not _text_record(value.documents.get(id)):
+			return false
+		if not value.get("document_labels", {}).get(id) is String:
 			return false
 	for id in definition.details:
 		if not _text_record(value.details.get(id)):
@@ -45,12 +50,14 @@ func _valid_content(value: Dictionary, case_id: String = "nina") -> bool:
 	for id in ["greeting"] + definition.topics:
 		if not value.dialogues.get(id) is String:
 			return false
-	for id in ["issue", "retain", "appropriate"]:
+	for id in Cases.outcome_ids(case_id):
 		if not value.reactions.get(id) is String:
 			return false
 	if not value.presentation.get("outcomes") is Dictionary:
 		return false
-	for id in ["issue", "retain", "appropriate"]:
+	if not value.presentation.get("recipient_captions") is Dictionary:
+		return false
+	for id in Cases.outcome_ids(case_id):
 		if not value.presentation.outcomes.get(id) is String:
 			return false
 	for key in ["name", "first_name", "talk_hint", "number", "package_title", "item_accusative", "item_nominative", "overview", "issue_caption", "appropriate_caption", "document_header", "identity_seal", "portrait"]:
@@ -58,6 +65,9 @@ func _valid_content(value: Dictionary, case_id: String = "nina") -> bool:
 			return false
 	for id in definition.topics:
 		if not value.get("topic_labels", {}).get(id) is String:
+			return false
+	for recipient in definition.recipients:
+		if not value.presentation.get("recipient_captions", {}).get(recipient) is String:
 			return false
 	return true
 

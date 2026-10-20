@@ -7,9 +7,9 @@ const Cases = preload("res://scripts/core/case_definitions.gd")
 static func initial_state() -> Dictionary:
 	return {
 		"version": 1, "started": false, "case_id": "nina", "case_status": "active",
-		"package": {"id": "P01", "location": "shelf", "opened": false},
+		"package": Cases.initial_package("nina"),
 		"read_documents": [], "inspected_details": [], "asked_topics": [],
-		"dialogue_id": "greeting", "decision": "", "completed_cases": {}
+		"dialogue_id": "greeting", "decision": "", "recipient": "", "completed_cases": {}
 	}
 
 static func apply_command(state: Dictionary, command: Dictionary) -> Dictionary:
@@ -38,7 +38,7 @@ static func apply_command(state: Dictionary, command: Dictionary) -> Dictionary:
 		record.erase("completed_cases")
 		advanced.completed_cases[state.case_id] = record
 		advanced.case_id = Cases.ORDER[Cases.ORDER.find(state.case_id) + 1]
-		advanced.package.id = Cases.get_case(advanced.case_id).package_id
+		advanced.package = Cases.initial_package(advanced.case_id)
 		return _accept(advanced)
 	if state.case_status != "active":
 		return _reject(state, "Обращение уже завершено.")
@@ -59,18 +59,37 @@ static func apply_command(state: Dictionary, command: Dictionary) -> Dictionary:
 				return _reject(state, "Сначала поставьте вещь на стол.")
 			if next.package.opened:
 				return _reject(state, "Содержимое уже открыто.")
+			if definition.has("lock_code") and not next.package.get("unlocked", false):
+				return _reject(state, "Сначала откройте кодовый замок.")
 			next.package.opened = true
+		"UNLOCK_PACKAGE":
+			if not definition.has("lock_code") or next.package.location != "desk":
+				return _reject(state, "Кодовый замок доступен у чемодана на столе.")
+			if next.package.unlocked:
+				return _reject(state, "Замок уже открыт.")
+			var code: Variant = command.get("code")
+			if not code is String or code != definition.lock_code:
+				return _reject(state, "Замок не открылся. Проверьте три цифры.")
+			next.package.unlocked = true
+		"LIFT_LINING":
+			if not next.package.has("lining_lifted") or next.package.location != "desk" or not next.package.opened:
+				return _reject(state, "Подкладка доступна внутри открытого чемодана на столе.")
+			if next.package.lining_lifted:
+				return _reject(state, "Подкладка уже приподнята.")
+			next.package.lining_lifted = true
 		"INSPECT_DETAIL":
 			var detail: Variant = command.get("detail_id")
 			if not detail is String or detail not in definition.details:
 				return _reject(state, "Такого признака нет.")
 			if next.package.location != "desk" or not next.package.opened:
 				return _reject(state, "Откройте вещь на столе.")
+			if detail == "zipper" and not next.package.get("lining_lifted", false):
+				return _reject(state, "Сначала приподнимите подкладку.")
 			if detail not in next.inspected_details:
 				next.inspected_details.append(detail)
 		"READ_DOCUMENT":
 			var document: Variant = command.get("document_id")
-			if not document is String or document not in DOCUMENT_IDS:
+			if not document is String or document not in definition.documents:
 				return _reject(state, "Таких бумаг в обращении нет.")
 			if document not in next.read_documents:
 				next.read_documents.append(document)
@@ -84,15 +103,18 @@ static func apply_command(state: Dictionary, command: Dictionary) -> Dictionary:
 				next.asked_topics.append(topic)
 			next.dialogue_id = topic
 		"ISSUE_PACKAGE", "RETAIN_PACKAGE", "APPROPRIATE_PACKAGE":
+			if kind == "APPROPRIATE_PACKAGE" and not definition.allow_appropriate:
+				return _reject(state, "В этом обращении выберите получателя или хранение.")
 			if not can_decide(state):
-				return _reject(state, "Прочтите обе бумаги и осмотрите содержимое вещи.")
+				return _reject(state, "Сверьте документы и проверяемые признаки обращения.")
 			if kind != "RETAIN_PACKAGE" and next.package.location != "desk":
 				return _reject(state, "Сначала поставьте вещь на стол.")
 			if kind == "ISSUE_PACKAGE":
-				if command.get("recipient") != state.case_id:
+				if command.get("recipient") not in definition.recipients:
 					return _reject(state, "Для выдачи укажите заявителя текущего обращения.")
 				next.package.location = "issued"
 				next.decision = "issue"
+				next.recipient = command.recipient
 			elif kind == "RETAIN_PACKAGE":
 				next.package.location = "shelf"
 				next.decision = "retain"
@@ -106,16 +128,26 @@ static func apply_command(state: Dictionary, command: Dictionary) -> Dictionary:
 	return _accept(next)
 
 static func can_decide(state: Dictionary) -> bool:
-	return state.started and state.case_status == "active" \
-		and "identity" in state.read_documents and "claim" in state.read_documents \
-		and state.package.opened and not state.inspected_details.is_empty()
+	if not state.started or state.case_status != "active" or not state.package.opened or state.inspected_details.is_empty():
+		return false
+	var definition: Dictionary = Cases.get_case(state.case_id)
+	for id in definition.documents:
+		if id not in state.read_documents:
+			return false
+	for id in definition.get("required_details", []):
+		if id not in state.inspected_details:
+			return false
+	for id in definition.get("required_topics", []):
+		if id not in state.asked_topics:
+			return false
+	return true
 
 static func all_packages(state: Dictionary) -> Dictionary:
 	# Active package and archived cases each own one state. This is a derived view.
 	var result: Dictionary = {}
 	for id in Cases.ORDER:
 		var package_id: String = Cases.get_case(id).package_id
-		result[package_id] = {"id": package_id, "location": "shelf", "opened": false}
+		result[package_id] = Cases.initial_package(id)
 	for record in state.get("completed_cases", {}).values():
 		result[record.package.id] = record.package.duplicate(true)
 	result[state.package.id] = state.package.duplicate(true)

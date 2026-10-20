@@ -61,7 +61,8 @@ func _run() -> void:
 func _play_case(decision: String) -> bool:
 	await _click_caption("Начать смену")
 	if not await _wait(func(): return store.get_snapshot().started and room.visitor_phase == "waiting", 4.0):
-		_expect(false, decision + ": mouse starts shift and visitor arrives")
+		_expect(false, decision + ": mouse starts shift and visitor arrives; state=%s phase=%s" % [store.get_snapshot(), room.visitor_phase])
+		await _capture(decision + "-start-failed")
 		return false
 	_expect(ui._modal_kind == "dialogue", decision + ": arrival conversation is visible")
 	await _key(KEY_ESCAPE)
@@ -177,6 +178,15 @@ func _click_caption(caption: String) -> void:
 	if not _expect(is_instance_valid(button) and button.is_visible_in_tree() and not button.disabled, "clickable control: " + caption):
 		return
 	var point := button.get_global_rect().get_center()
+	var ancestor: Node = button.get_parent()
+	var clipped_by := ""
+	while ancestor != null:
+		if ancestor is Control and ancestor.clip_contents and not ancestor.get_global_rect().has_point(point):
+			clipped_by = str(ancestor.name) + " " + str(ancestor.get_global_rect())
+			break
+		ancestor = ancestor.get_parent()
+	if not _expect(clipped_by.is_empty(), "button is inside ancestor clip: " + caption + " at " + str(point) + " clipped by " + clipped_by):
+		return
 	_expect(root.get_visible_rect().has_point(point), "button is inside viewport: " + caption)
 	await _click_at(point)
 

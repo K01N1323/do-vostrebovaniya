@@ -1,0 +1,5663 @@
+{
+	"captures": [
+		{
+			"id": "issue-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P01",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "issue-shelf-hover",
+			"modal": "",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P01",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "issue-close-up",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [
+					"napkin"
+				],
+				"package": {
+					"id": "P01",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "issue-lunch-conversation",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [
+					"lunch"
+				],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "lunch",
+				"inspected_details": [
+					"napkin",
+					"sandwiches"
+				],
+				"package": {
+					"id": "P01",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "issue-outcome",
+			"modal": "result",
+			"state": {
+				"asked_topics": [
+					"lunch"
+				],
+				"case_id": "nina",
+				"case_status": "resolved",
+				"completed_cases": {},
+				"decision": "issue",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"napkin",
+					"sandwiches"
+				],
+				"package": {
+					"id": "P01",
+					"location": "issued",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "nina",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-fedor-arrival",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-fedor-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-fedor-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-fedor-overview",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-fedor-corner",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-fedor-paint",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner",
+					"paint"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-fedor-collar",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-fedor-result",
+			"modal": "result",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "retain",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-two-packages-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "retain",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-two-packages-personal",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "retain",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-pair-arrival",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-code-dialogue",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-four-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-suitcase-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-wrong-code",
+			"modal": "lock",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-suitcase-overview",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-combination",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-green_stain",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-raised-lining",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-zipper",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-shared-memory",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lining_story",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-shared-decision",
+			"modal": "decision",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lining_story",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-shared-result",
+			"modal": "result",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "resolved",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "issue",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "issued",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "vera",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "vera-final-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "resolved",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [
+							"lunch"
+						],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "nina",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "issue",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "issued",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "vera",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1280, 800)"
+		},
+		{
+			"id": "retain-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P01",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "retain-shelf-hover",
+			"modal": "",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P01",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "retain-close-up",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [
+					"napkin"
+				],
+				"package": {
+					"id": "P01",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "retain-outcome",
+			"modal": "result",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "resolved",
+				"completed_cases": {},
+				"decision": "retain",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"napkin",
+					"sandwiches"
+				],
+				"package": {
+					"id": "P01",
+					"location": "shelf",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-fedor-arrival",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-fedor-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-fedor-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-fedor-overview",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-fedor-corner",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-fedor-paint",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner",
+					"paint"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-fedor-collar",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-fedor-result",
+			"modal": "result",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "appropriate",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "personal",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-two-packages-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "appropriate",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "personal",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-two-packages-personal",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "appropriate",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "personal",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-pair-arrival",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-code-dialogue",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-four-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-suitcase-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-wrong-code",
+			"modal": "lock",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-suitcase-overview",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-combination",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-green_stain",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-raised-lining",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-zipper",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-shared-memory",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lining_story",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-shared-decision",
+			"modal": "decision",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lining_story",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-shared-result",
+			"modal": "result",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "resolved",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "issue",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "issued",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "leonid",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "leonid-final-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "resolved",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "retain",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "shelf",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "issue",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "issued",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "leonid",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1000, 700)"
+		},
+		{
+			"id": "appropriate-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P01",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "appropriate-shelf-hover",
+			"modal": "",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P01",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "appropriate-close-up",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "active",
+				"completed_cases": {},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [
+					"napkin"
+				],
+				"package": {
+					"id": "P01",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "appropriate-outcome",
+			"modal": "result",
+			"state": {
+				"asked_topics": [],
+				"case_id": "nina",
+				"case_status": "resolved",
+				"completed_cases": {},
+				"decision": "appropriate",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"napkin",
+					"sandwiches"
+				],
+				"package": {
+					"id": "P01",
+					"location": "personal",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-fedor-arrival",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-fedor-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-fedor-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "shelf",
+					"opened": false
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-fedor-overview",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-fedor-corner",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-fedor-paint",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner",
+					"paint"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-fedor-collar",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"work"
+				],
+				"case_id": "fedor",
+				"case_status": "active",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "work",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "desk",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-fedor-result",
+			"modal": "result",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "issue",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "issued",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "fedor",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-two-packages-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "issue",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "issued",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "fedor",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "issue-two-packages-personal",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"work",
+					"blue_paint"
+				],
+				"case_id": "fedor",
+				"case_status": "resolved",
+				"completed_cases": {
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "issue",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"corner",
+					"paint",
+					"collar"
+				],
+				"package": {
+					"id": "P02",
+					"location": "issued",
+					"opened": true
+				},
+				"read_documents": [
+					"identity",
+					"claim"
+				],
+				"recipient": "fedor",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-pair-arrival",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "greeting",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-code-dialogue",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-four-papers",
+			"modal": "comparison",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-suitcase-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "shelf",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-wrong-code",
+			"modal": "lock",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": false,
+					"unlocked": false
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-suitcase-overview",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-combination",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-green_stain",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": false,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-raised-lining",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-zipper",
+			"modal": "inspection",
+			"state": {
+				"asked_topics": [
+					"lock_code"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lock_code",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-shared-memory",
+			"modal": "dialogue",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lining_story",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-shared-decision",
+			"modal": "decision",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "active",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "",
+				"dialogue_id": "lining_story",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "desk",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-shared-result",
+			"modal": "result",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "resolved",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "retain",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "shelf",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		},
+		{
+			"id": "retain-final-shelf",
+			"modal": "",
+			"state": {
+				"asked_topics": [
+					"lock_code",
+					"lining_story"
+				],
+				"case_id": "melnikovs",
+				"case_status": "resolved",
+				"completed_cases": {
+					"fedor": {
+						"asked_topics": [
+							"work",
+							"blue_paint"
+						],
+						"case_id": "fedor",
+						"case_status": "resolved",
+						"decision": "issue",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"corner",
+							"paint",
+							"collar"
+						],
+						"package": {
+							"id": "P02",
+							"location": "issued",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "fedor",
+						"started": true,
+						"version": 1
+					},
+					"nina": {
+						"asked_topics": [],
+						"case_id": "nina",
+						"case_status": "resolved",
+						"decision": "appropriate",
+						"dialogue_id": "reaction",
+						"inspected_details": [
+							"napkin",
+							"sandwiches"
+						],
+						"package": {
+							"id": "P01",
+							"location": "personal",
+							"opened": true
+						},
+						"read_documents": [
+							"identity",
+							"claim"
+						],
+						"recipient": "",
+						"started": true,
+						"version": 1
+					}
+				},
+				"decision": "retain",
+				"dialogue_id": "reaction",
+				"inspected_details": [
+					"combination",
+					"green_stain",
+					"zipper"
+				],
+				"package": {
+					"id": "P03",
+					"lining_lifted": true,
+					"location": "shelf",
+					"opened": true,
+					"unlocked": true
+				},
+				"read_documents": [
+					"vera_identity",
+					"vera_claim",
+					"leonid_identity",
+					"leonid_claim"
+				],
+				"recipient": "",
+				"started": true,
+				"version": 1
+			},
+			"viewport_size": "(1440.0, 900.0)",
+			"window_size": "(1440, 900)"
+		}
+	],
+	"checks": 788,
+	"failures": [],
+	"version": "0.7"
+}

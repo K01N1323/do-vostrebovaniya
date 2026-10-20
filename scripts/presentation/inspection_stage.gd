@@ -16,7 +16,13 @@ const BRICK_VIEWS := {
 	"paint": {"eye": Vector3(0.07, 0.78, 0.45), "at": Vector3(0.025, 0.23, -0.005), "fov": 32.0},
 	"collar": {"eye": Vector3(0.43, 0.40, 0.48), "at": Vector3(0.28, 0.058, 0.16), "fov": 29.0}
 }
+const SUITCASE_VIEWS := {
+	"combination": {"eye": Vector3(0, 0.29, 0.76), "at": Vector3(0, 0.125, 0.27), "fov": 31.0},
+	"green_stain": {"eye": Vector3(-0.23, 0.64, 0.45), "at": Vector3(-0.16, 0.042, 0.01), "fov": 33.0},
+	"zipper": {"eye": Vector3(0.42, 0.37, 0.39), "at": Vector3(0.23, 0.05, 0.08), "fov": 25.0}
+}
 var _package_id := "P01"
+var _pending_lining := false
 
 @export var input_enabled: bool = true
 @export var reduced_motion: bool = false
@@ -31,8 +37,8 @@ var _overview_fov: float
 @onready var _package: Node3D = $Pivot/Package
 
 func _ready() -> void:
-	if _package_id == "P02":
-		_swap_brick()
+	if _package_id != "P01":
+		_swap_package()
 	_package.set_opened(_pending_opened)
 	_package.set_detail_picking(true)
 	$Camera3D.current = true
@@ -41,6 +47,12 @@ func _ready() -> void:
 		$Camera3D.position = Vector3(0.12, 0.95, 1.00)
 		$Camera3D.look_at(Vector3(0, 0.10, 0), Vector3.UP)
 		$Camera3D.fov = 44
+	elif _package_id == "P03":
+		_package.set_unlocked(true)
+		_package.set_lining_lifted(_pending_lining)
+		$Camera3D.position = Vector3(0.04, 0.95, 1.15)
+		$Camera3D.look_at(Vector3(0, 0.17, -0.03), Vector3.UP)
+		$Camera3D.fov = 45
 	_overview = $Camera3D.transform
 	_overview_fov = $Camera3D.fov
 	var environment := WorldEnvironment.new()
@@ -60,15 +72,22 @@ func set_item(package_id: String = "P01") -> void:
 	_package_id = package_id
 	set_opened(true)
 
-func _swap_brick() -> void:
+func _swap_package() -> void:
 	_pivot.remove_child(_package)
 	_package.queue_free()
-	_package = preload("res://scenes/objects/brick_package.tscn").instantiate()
+	_package = (preload("res://scenes/objects/brick_package.tscn") if _package_id == "P02" else preload("res://scenes/objects/suitcase.tscn")).instantiate()
 	_package.name = "Package"
 	_pivot.add_child(_package)
 
 func _views() -> Dictionary:
+	if _package_id == "P03":
+		return SUITCASE_VIEWS
 	return BRICK_VIEWS if _package_id == "P02" else DETAIL_VIEWS
+
+func set_lining_lifted(value: bool) -> void:
+	_pending_lining = value
+	if is_node_ready() and _package.has_method("set_lining_lifted"):
+		_package.set_lining_lifted(value)
 
 func set_opened(value: bool) -> void:
 	_pending_opened = value
@@ -83,6 +102,8 @@ func get_focus_id() -> String:
 
 func focus_detail(detail_id: String) -> void:
 	if not is_node_ready() or not _views().has(detail_id):
+		return
+	if _package_id == "P03" and detail_id == "zipper" and not _pending_lining:
 		return
 	if is_instance_valid(_turn):
 		_turn.kill()
@@ -142,6 +163,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not result.is_empty():
 		var collider: Object = result["collider"]
 		var detail_id := str(collider.get_meta("target_id", ""))
-		if _views().has(detail_id):
+		if _views().has(detail_id) or (_package_id == "P03" and detail_id == "lining"):
 			detail_selected.emit(detail_id)
 			get_viewport().set_input_as_handled()

@@ -57,6 +57,9 @@ func _ready() -> void:
 	var brick := preload("res://scenes/objects/brick_package.tscn").instantiate()
 	add_child(brick)
 	_package_views["P02"] = brick
+	var suitcase := preload("res://scenes/objects/suitcase.tscn").instantiate()
+	add_child(suitcase)
+	_package_views["P03"] = suitcase
 	_build_lighting()
 	var pending := _snapshot.duplicate(true)
 	_snapshot.clear()
@@ -115,6 +118,8 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 		set_hovered("")
 
 func _package_position(package_id: String, location: String) -> Vector3:
+	if package_id == "P03" and location == "shelf":
+		return Vector3(-1.55, 0.32, 0.48)
 	if package_id == "P02":
 		if location == "shelf":
 			return Vector3(-1.65, 2.06, 0.65)
@@ -133,6 +138,9 @@ func _render_inactive_packages() -> void:
 		view.position = _package_position(id, item.location)
 		view.rotation_degrees.y = 59 if item.location == "shelf" else -45
 		view.set_opened(false)
+		if view.has_method("set_unlocked"):
+			view.set_unlocked(item.get("unlocked",false))
+			view.set_lining_lifted(item.get("lining_lifted",false))
 		view.set_highlighted(false)
 		var target: StaticBody3D = view.get_node("Target_" + id)
 		target.collision_layer = 0
@@ -155,6 +163,9 @@ func _update_package_lid() -> void:
 	var package_state: Dictionary = _snapshot.get("package", {})
 	# Opened records knowledge; the lid closes when looking back at the visitor.
 	_package.set_opened(bool(package_state.get("opened", false)) and package_state.get("location", "shelf") == "desk" and _view_id == "desk")
+	if _package.has_method("set_unlocked"):
+		_package.set_unlocked(package_state.get("unlocked", false))
+		_package.set_lining_lifted(package_state.get("lining_lifted", false))
 
 func rotate_package(direction: float) -> void:
 	if transfer_active or not is_instance_valid(_package) or not _package.visible:
@@ -380,10 +391,10 @@ func _build_shelf() -> void:
 		G.box(shelf, Vector3(1.4, 0.07, 0.025), Vector3(0, height, 0.39), G.worn_material(Color("77725a"), "wood"))
 	var crate: Node3D = CRATE_PROBE.instantiate()
 	crate.name = "ImportedCrateProbe"
-	crate.position = Vector3(-0.30, 0.55, 0)
-	crate.scale = Vector3(0.50, 0.45, 0.5)
+	crate.position = Vector3(-0.46, 0.49, 0)
+	crate.scale = Vector3(0.26, 0.35, 0.35)
 	shelf.add_child(crate)
-	G.box(shelf, Vector3(0.45, 0.35, 0.47), Vector3(0.29, 0.50, 0), G.worn_material(Color("77755e"), "paper"))
+	G.label(shelf, "П03", Vector3(0.20, 0.28, 0.412), 20, Color("c8b788"))
 	G.label(shelf, "П02", Vector3(0, 2.02, 0.412), 20, Color("c8b788"))
 	var folders := [Color("6b6552"), Color("82735b"), Color("626d67")]
 	for i in range(5):
@@ -614,30 +625,35 @@ func _load_nina_image_if_available() -> void:
 	_face_depth = 0.06
 
 func _configure_visitor(case_id: String) -> void:
+	var presentation: Dictionary = GameStore.get_case_content(case_id).presentation
 	if _paper_titles.has("claim"):
-		_paper_titles.claim.text = "ЗАЯВЛЕНИЕ № " + ("02" if case_id == "fedor" else "01")
+		_paper_titles.claim.text = ("ЗАЯВЛЕНИЯ № " if case_id == "melnikovs" else "ЗАЯВЛЕНИЕ № ") + presentation.number
 	if _paper_titles.has("identity"):
-		_paper_titles.identity.text = "ДОКУМЕНТ" if case_id == "fedor" else "УДОСТОВЕРЕНИЕ"
-	var nina := _visitor.get_node_or_null("NinaPortrait") as Sprite3D
-	if is_instance_valid(nina):
-		nina.visible = case_id == "nina"
-	var fedor := _visitor.get_node_or_null("FedorPortrait") as Sprite3D
-	if case_id == "fedor" and not is_instance_valid(fedor):
-		fedor = Sprite3D.new()
-		fedor.name = "FedorPortrait"
-		fedor.texture = preload("res://assets/characters/fedor-v1.png")
-		fedor.pixel_size = 1.84 / float(fedor.texture.get_height())
-		fedor.position = Vector3(0, 0.92, 0.06)
-		fedor.set_script(preload("res://scripts/presentation/visitor_portrait.gd"))
-		fedor.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		fedor.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-		fedor.alpha_scissor_threshold = 0.05
-		fedor.shaded = false
-		fedor.modulate = Color(0.66, 0.84, 0.88)
-		_visitor.add_child(fedor)
-	if is_instance_valid(fedor):
-		fedor.visible = case_id == "fedor"
-	_visitor_geometry.visible = not is_instance_valid(nina) and case_id == "nina"
+		_paper_titles.identity.text = "ДОКУМЕНТЫ · 2" if case_id == "melnikovs" else ("ДОКУМЕНТ" if case_id == "fedor" else "УДОСТОВЕРЕНИЕ")
+	var portrait_name := case_id.capitalize() + "Portrait"
+	for name_value in ["NinaPortrait", "FedorPortrait", "MelnikovsPortrait"]:
+		var existing := _visitor.get_node_or_null(name_value) as Sprite3D
+		if is_instance_valid(existing):
+			existing.visible = name_value == portrait_name
+	var portrait := _visitor.get_node_or_null(portrait_name) as Sprite3D
+	if not is_instance_valid(portrait):
+		portrait = Sprite3D.new()
+		portrait.name = portrait_name
+		portrait.texture = load(presentation.portrait)
+		portrait.pixel_size = 1.84 / float(portrait.texture.get_height())
+		portrait.position = Vector3(0, 0.92, 0.06)
+		portrait.set_script(preload("res://scripts/presentation/visitor_portrait.gd"))
+		portrait.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		portrait.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+		portrait.alpha_scissor_threshold = 0.05
+		portrait.shaded = false
+		portrait.modulate = Color(0.66, 0.84, 0.88)
+		_visitor.add_child(portrait)
+	portrait.visible = true
+	var anchor := Vector3(-0.11 if case_id == "melnikovs" else 0.0, 0.92, 0.06)
+	portrait.set("anchor_position", anchor)
+	portrait.position = anchor
+	_visitor_geometry.visible = false
 	_visitor_target.set_meta("target_id", case_id)
 
 func _build_lighting() -> void:

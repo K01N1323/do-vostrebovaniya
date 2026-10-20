@@ -94,14 +94,14 @@ func _play_fedor(decision: String) -> bool:
 	await _key(KEY_ESCAPE)
 	# Returning to shelf is not a decision, and collected evidence persists.
 	await _click_caption("Вернуть на полку · пока думаю")
-	_expect(store.get_snapshot().case_status == "active" and store.get_snapshot().inspected_details.size() == 3, "Fedor remains active while thinking")
+	_expect(store.get_snapshot().case_status == "active" and store.get_snapshot().package.location == "shelf" and store.get_snapshot().inspected_details.size() == 3, "Fedor remains active on the shelf while thinking")
 	if decision != "retain":
 		await _click_caption("Поставить на стол")
 	await _click_caption("Принять решение")
 	var captions := {"issue":"Выдать свёрток Фёдору Аргунову", "retain":"Завершить обращение · оставить на хранении", "appropriate":"Убрать под стол · присвоить свёрток"}
 	await _click_caption(captions[decision])
 	_expect(store.get_snapshot().decision == decision and store.get_snapshot().case_status == "resolved", "Fedor outcome " + decision)
-	_expect(_find_button(ui, "Следующий посетитель") == null, "no transition to unimplemented visitor")
+	_expect(is_instance_valid(_find_button(ui, "Следующий посетитель")) and _find_button(ui, "Следующий посетитель").disabled, "next visitor waits for Fedor departure")
 	await _capture(decision + "-fedor-result")
 	await _key(KEY_ESCAPE)
 	_expect(await _wait(func(): return room.visitor_phase == "gone" and not room.transfer_active, 5.0), "Fedor departure and handover complete")

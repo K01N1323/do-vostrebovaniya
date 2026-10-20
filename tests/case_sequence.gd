@@ -27,7 +27,7 @@ func _reject(state: Dictionary, command: Dictionary) -> void:
 
 func _verify(state: Dictionary, package_id: String, location: String) -> void:
 	var packages: Dictionary = Rules.all_packages(state)
-	_expect(packages.size() == 2 and packages.has("P01") and packages.has("P02"), "one entry per package")
+	_expect(packages.size() == 3 and packages.has("P01") and packages.has("P02") and packages.has("P03"), "one entry per package")
 	_expect(packages[package_id].location == location, package_id + " retains its location")
 	packages[package_id].location = "corrupted"
 	_expect(Rules.all_packages(state)[package_id].location == location, "derived package view cannot change state")
@@ -73,8 +73,10 @@ func _run() -> void:
 			_verify(state, "P01", locations[nina_choice])
 			_verify(state, "P02", locations[fedor_choice])
 			_expect(state.completed_cases.nina == nina_record, "Fedor choice cannot rewrite Nina")
-			_reject(state, {"type":"NEXT_CASE"})
 			_reject(state, {"type":"MOVE_PACKAGE", "destination":"desk"})
+			var melnikovs := _apply(state, {"type":"NEXT_CASE"})
+			_expect(melnikovs.case_id == "melnikovs" and melnikovs.completed_cases.has("fedor"), "Fedor can advance to the shared case")
+			_reject(melnikovs, {"type":"NEXT_CASE"})
 			var reset := _apply(state, {"type":"RESTART"})
 			_expect(reset == Rules.initial_state(), "restart resets the whole shift")
 	# Content must switch before emitting the new snapshot, then switch back on restart.

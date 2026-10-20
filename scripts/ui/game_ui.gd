@@ -28,6 +28,7 @@ var _muted := false
 var _reduced := false
 var _inspection: Node3D
 var _detail_buttons: Dictionary = {}
+var _lining_button: Button
 var _inspection_caption: Label
 var _inspection_overview: Button
 var _inspection_turns: Array[Button] = []
@@ -153,23 +154,33 @@ func render(state: Dictionary) -> void:
 	if not is_instance_valid(sidebar):
 		return
 	_clear(sidebar)
+	_action_panel.offset_bottom = minf(720, size.y - 110)
 	_label(sidebar,"ОБРАЩЕНИЕ " + _p().number,13,GOLD)
-	_label(sidebar,_p().name,21)
+	var case_name := _label(sidebar,_p().name,21)
+	case_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if state.case_status == "resolved":
 		objective.text = "Обращение завершено"
 		var outcomes: Dictionary = _p().outcomes
-		_text(sidebar,outcomes.get(state.decision,""),17)
+		_text(sidebar,outcomes.get(Cases.outcome_key(state),""),17)
 		_add_next_button(sidebar)
 		_button(sidebar,"Начать заново",_restart)
 		return
 	objective.text = _next_step(state)
 	var decision := _action(sidebar,"Принять решение",_show_decision)
 	decision.disabled = not Rules.can_decide(state)
-	decision.tooltip_text = "Прочтите обе бумаги и осмотрите содержимое."
-	for entry in [["identity","Удостоверение"],["claim","Заявление"]]:
-		var id: String = entry[0]
-		_action(sidebar,entry[1]+(" ✓" if id in state.read_documents else ""),func(): _show_document(id))
-	_action(sidebar,"Сравнить обе бумаги",_show_comparison)
+	decision.tooltip_text = "Сверьте все бумаги и признаки текущего обращения."
+	if snapshot.case_id == "melnikovs":
+		for person in ["vera", "leonid"]:
+			var owner_id: String = person
+			var documents: Array = [owner_id + "_identity", owner_id + "_claim"]
+			var checked: bool = documents[0] in state.read_documents and documents[1] in state.read_documents
+			_action(sidebar,("Бумаги Веры" if owner_id == "vera" else "Бумаги Леонида") + (" ✓" if checked else ""),func(): _show_comparison(documents))
+		_action(sidebar,"Сверить все четыре бумаги",_show_comparison)
+	else:
+		for id in Cases.get_case(snapshot.case_id).documents:
+			var document_id: String = id
+			_action(sidebar,GameStore.content.document_labels[id]+(" ✓" if id in state.read_documents else ""),func(): _show_document(document_id))
+		_action(sidebar,"Сравнить обе бумаги",_show_comparison)
 	_rule(sidebar)
 	if state.package.location == "shelf":
 		_action(sidebar,"Поставить на стол",func(): _move("desk"))
@@ -181,8 +192,15 @@ func render(state: Dictionary) -> void:
 func _next_step(state: Dictionary) -> String:
 	if not state.started:
 		return "Ожидается посетитель"
-	if state.read_documents.size() < 2:
+	if state.read_documents.size() < Cases.get_case(state.case_id).documents.size():
 		return "Сверьте бумаги посетителя"
+	if state.case_id == "melnikovs":
+		if "lock_code" not in state.asked_topics:
+			return "Уточните у посетителей код замка"
+		if not state.package.get("unlocked", false):
+			return "Откройте замок чемодана на столе"
+		if "green_stain" not in state.inspected_details or "zipper" not in state.inspected_details:
+			return "Проверьте пятно и деталь под подкладкой"
 	if not state.package.opened or state.inspected_details.is_empty():
 		return "Осмотрите " + _p().item_accusative + " на своём столе"
 	return "Проверка завершена. Решение за вами"
@@ -207,9 +225,12 @@ func open_target(target_id: String) -> void:
 			_show_conversation()
 	elif target_id in Cases.get_case(snapshot.case_id).details:
 		_inspect_detail(target_id)
-	elif target_id in ["identity", "claim"]:
+	elif target_id in Cases.get_case(snapshot.case_id).documents:
 		if snapshot.case_status == "active":
 			_show_document(target_id)
+	elif target_id in ["identity", "claim"] and snapshot.case_id == "melnikovs":
+		if snapshot.case_status == "active":
+			_show_comparison()
 	elif target_id == "archive":
 		_show_hint("Старые дела. Сначала закончите обращение у окна.")
 	elif target_id == "hatch":
@@ -231,18 +252,25 @@ func _show_document(id: String) -> void:
 	_document(modal_body,GameStore.content.documents[id],id)
 	_button(modal_body,"Вернуться к столу",_close_modal)
 
-func _show_comparison() -> void:
-	for id in ["identity","claim"]:
+func _show_comparison(selected: Array = []) -> void:
+	var documents: Array = selected if not selected.is_empty() else Cases.get_case(snapshot.case_id).documents
+	for id in documents:
 		GameStore.dispatch({"type":"READ_DOCUMENT","document_id":id})
 	_begin_modal("Сверка бумаг · " + _p().name,"comparison")
-	var row := HBoxContainer.new()
-	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	modal_body.add_child(row)
-	for id in ["identity","claim"]:
-		_document(row,GameStore.content.documents[id],id)
+	if documents.size() > 2:
+		modal.position = Vector2(36,118)
+		modal.size = Vector2(1100,680)
+	for offset in range(0, documents.size(), 2):
+		var row := HBoxContainer.new()
+		row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		modal_body.add_child(row)
+		for index in range(offset, mini(offset + 2, documents.size())):
+			var id: String = documents[index]
+			_document(row,GameStore.content.documents[id],id)
 	_button(modal_body,"Вернуться к столу",_close_modal)
 
 func _document(parent: Node, record: Dictionary, id: String) -> void:
+	var identity := id.ends_with("identity")
 	if id == "identity" and _modal_kind != "comparison" and _p().get("identity_layout", "sheet") == "booklet":
 		_identity_booklet(parent,record)
 		return
@@ -250,13 +278,14 @@ func _document(parent: Node, record: Dictionary, id: String) -> void:
 	page.name = "Paper_"+id
 	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	page.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	page.grain_seed = 47 if id == "identity" else 13
+	page.grain_seed = 47 if identity else 13
 	parent.add_child(page)
 	var stack := VBoxContainer.new()
 	page.add_child(stack)
 	var head := HBoxContainer.new()
 	stack.add_child(head)
-	var title := _label(head,_p().document_header if id == "identity" else "ФОРМА БН–" + _p().number,16,INK)
+	var header: String = record.title if snapshot.case_id == "melnikovs" else (_p().document_header if identity else "ФОРМА БН–" + _p().number)
+	var title := _label(head,header,16,INK)
 	title.add_theme_font_override("font",_typewriter_font)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_label(head,"15 / X",14,Color("65644e"))
@@ -269,7 +298,7 @@ func _document(parent: Node, record: Dictionary, id: String) -> void:
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_theme_color_override("default_color",INK)
 	body.add_theme_font_override("normal_font",_typewriter_font)
-	var seal := _label(stack,"БЮРО НАХОДОК  ·  ПРИНЯТО" if id == "claim" else _p().identity_seal,12,Color("704f42"))
+	var seal := _label(stack,"БЮРО НАХОДОК  ·  ПРИНЯТО" if not identity else _p().identity_seal,12,Color("704f42"))
 	seal.add_theme_font_override("font",_typewriter_font)
 	seal.rotation = -0.018
 
@@ -319,6 +348,9 @@ func _identity_booklet(parent: Node, record: Dictionary) -> void:
 	body.add_theme_font_override("normal_font",_typewriter_font)
 
 func _show_inspection() -> void:
+	if snapshot.package.has("unlocked") and not snapshot.package.unlocked:
+		_show_lock()
+		return
 	_close_modal()
 	_focus("desk")
 	if not snapshot.package.opened:
@@ -346,6 +378,7 @@ func _show_inspection() -> void:
 	_inspection.set_item(snapshot.package.id)
 	viewport.add_child(_inspection)
 	_inspection.set_opened(true)
+	_inspection.set_lining_lifted(snapshot.package.get("lining_lifted", false))
 	_inspection.reduced_motion = _reduced
 	_inspection.detail_selected.connect(_inspect_detail)
 	_inspection.focus_changed.connect(_refresh_inspection_focus)
@@ -367,15 +400,25 @@ func _show_inspection() -> void:
 	row.add_child(right)
 	_label(right,"ПРИЗНАКИ",13,GOLD)
 	_detail_buttons.clear()
+	_lining_button = null
+	if snapshot.package.has("lining_lifted"):
+		_lining_button = _button(right,"Приподнять подкладку",_lift_lining)
+		_lining_button.disabled = snapshot.package.lining_lifted
 	for id in Cases.get_case(snapshot.case_id).details:
 		var detail_id: String = id
 		_detail_buttons[id] = _button(right,GameStore.content.details[id].title+(" ✓" if id in snapshot.inspected_details else ""),func(): _inspect_detail(detail_id))
+	if _detail_buttons.has("zipper"):
+		_detail_buttons.zipper.disabled = not snapshot.package.get("lining_lifted", false)
+		_detail_buttons.zipper.tooltip_text = "Сначала приподнимите подкладку."
 	var observation := _text(right,"Выберите предмет на изображении или признак справа, чтобы рассмотреть его ближе. Наблюдения сохранятся после осмотра.",18)
 	observation.name = "Observation"
 	observation.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_button(modal_body,"Закончить осмотр · Esc",_close_modal)
 
 func _inspect_detail(id: String) -> void:
+	if id == "lining":
+		_lift_lining()
+		return
 	if not GameStore.dispatch({"type":"INSPECT_DETAIL","detail_id":id}).ok:
 		return
 	if is_instance_valid(modal):
@@ -387,6 +430,46 @@ func _inspect_detail(id: String) -> void:
 	if is_instance_valid(_inspection) and _inspection.is_inside_tree() and _modal_kind == "inspection":
 		_inspection.focus_detail(id)
 	_show_hint("Осмотрено: "+GameStore.content.details[id].title)
+
+func _show_lock() -> void:
+	_close_modal()
+	_focus("desk")
+	_begin_modal("Кодовый замок · П03","lock")
+	modal.position = Vector2(410,300)
+	modal.size = Vector2(620,280)
+	_text(modal_body,"Три колёсика. Какой код назвал посетитель?",19)
+	var code := LineEdit.new()
+	code.name = "LockCode"
+	code.placeholder_text = "Три цифры"
+	code.max_length = 3
+	code.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	code.custom_minimum_size.y = 42
+	modal_body.add_child(code)
+	var feedback := _label(modal_body,"",16,GOLD)
+	feedback.name = "LockFeedback"
+	var unlock := func():
+		var result: Dictionary = GameStore.dispatch({"type":"UNLOCK_PACKAGE","code":code.text})
+		if result.ok:
+			_show_inspection()
+		else:
+			feedback.text = result.error
+			code.grab_focus()
+	_button(modal_body,"Открыть замок",unlock)
+	code.text_submitted.connect(func(_text_value: String): unlock.call())
+	code.grab_focus()
+
+func _lift_lining() -> void:
+	if not GameStore.dispatch({"type":"LIFT_LINING"}).ok:
+		return
+	if is_instance_valid(_inspection):
+		_inspection.set_lining_lifted(true)
+	if is_instance_valid(_lining_button):
+		_lining_button.disabled = true
+	if _detail_buttons.has("zipper") and is_instance_valid(_detail_buttons.zipper):
+		_detail_buttons.zipper.disabled = false
+	var observation := modal.find_child("Observation",true,false) if is_instance_valid(modal) else null
+	if is_instance_valid(observation):
+		observation.text = "Подкладка приподнята. Под тканью видна небольшая металлическая деталь. Осмотрите её."
 
 func _refresh_inspection_focus(id: String) -> void:
 	if is_instance_valid(_inspection_caption):
@@ -415,6 +498,12 @@ func _show_conversation() -> void:
 
 func _set_speech(text_value: String) -> void:
 	_speech_parts.clear()
+	if text_value.contains("\n"):
+		for line in text_value.split("\n", false):
+			_speech_parts.append(line.strip_edges())
+		_speech_index = 0
+		_refresh_speech()
+		return
 	var current := ""
 	for sentence in text_value.split(". "):
 		if current.length()+sentence.length() > 155 and not current.is_empty():
@@ -437,9 +526,10 @@ func _refresh_speech() -> void:
 		modal.position.y = 605
 		_button(_speech_choices,"Далее",func(): _speech_index+=1; _refresh_speech())
 		return
-	modal.size.y = 260
-	modal.position.y = 560
-	var topics := HBoxContainer.new()
+	modal.size.y = 320 if snapshot.case_id == "melnikovs" else 260
+	modal.position.y = 500 if snapshot.case_id == "melnikovs" else 560
+	var topics := GridContainer.new()
+	topics.columns = 2 if snapshot.case_id == "melnikovs" else 3
 	_speech_choices.add_child(topics)
 	var definition: Dictionary = Cases.get_case(snapshot.case_id)
 	for id in definition.topics:
@@ -457,19 +547,23 @@ func _show_decision() -> void:
 	_begin_modal("Куда отправить находку?","decision")
 	_text(modal_body,"Обращение № " + _p().number + " · " + _p().name,16,MUTED)
 	var at_desk: bool = snapshot.package.location == "desk"
-	var issue := _button(modal_body,_p().issue_caption,func(): _decide("ISSUE_PACKAGE"))
-	issue.disabled = not at_desk
+	var definition: Dictionary = Cases.get_case(snapshot.case_id)
+	for id in definition.recipients:
+		var recipient: String = id
+		var issue := _button(modal_body,_p().recipient_captions[recipient],func(): _decide("ISSUE_PACKAGE",recipient))
+		issue.disabled = not at_desk
 	_button(modal_body,"Завершить обращение · оставить на хранении",func(): _decide("RETAIN_PACKAGE"))
-	var appropriate := _button(modal_body,_p().appropriate_caption,func(): _decide("APPROPRIATE_PACKAGE"))
-	appropriate.disabled = not at_desk
+	if definition.allow_appropriate:
+		var appropriate := _button(modal_body,_p().appropriate_caption,func(): _decide("APPROPRIATE_PACKAGE"))
+		appropriate.disabled = not at_desk
 	if not at_desk:
 		_text(modal_body,"Для передачи сначала поставьте " + _p().item_accusative + " на стол.",16)
 	_button(modal_body,"Пока не решать",_close_modal)
 
-func _decide(type: String) -> void:
+func _decide(type: String, recipient: String = "") -> void:
 	var command := {"type":type}
 	if type == "ISSUE_PACKAGE":
-		command.recipient = snapshot.case_id
+		command.recipient = recipient if not recipient.is_empty() else (Cases.get_case(snapshot.case_id).recipients[0] if Cases.get_case(snapshot.case_id).recipients.size() == 1 else "")
 	if not GameStore.dispatch(command).ok:
 		return
 	_close_modal()
@@ -477,7 +571,9 @@ func _decide(type: String) -> void:
 	_action_panel.hide()
 	_show_hint("Обращение завершено. Результат сохранён до закрытия игры.")
 	_begin_modal(_p().first_name,"result")
-	_text(modal_body,GameStore.content.reactions[snapshot.decision],21)
+	_text(modal_body,GameStore.content.reactions[Cases.outcome_key(snapshot)],21)
+	if not Cases.has_next(snapshot.case_id):
+		_text(modal_body,"Конец доступного фрагмента. Следующие обращения ещё в разработке.",16,MUTED)
 	var buttons := HBoxContainer.new()
 	modal_body.add_child(buttons)
 	_button(buttons,"К работе",_close_modal)
@@ -595,7 +691,7 @@ func _begin_modal(title: String, kind: String) -> void:
 	var rect: Rect2
 	match kind:
 		"dialogue": rect = Rect2(220,520,950,300)
-		"result": rect = Rect2(30,570,620,250)
+		"result": rect = Rect2(30,480,740,340) if snapshot.case_id == "melnikovs" else Rect2(30,570,620,250)
 		"document": rect = Rect2(36,118,555,680)
 		"comparison": rect = Rect2(36,500,1100,320)
 		"inspection": rect = Rect2(36,240,990,580)
@@ -703,7 +799,7 @@ func _add_next_button(parent: Node) -> void:
 		button.name = "NextCase"
 		button.disabled = not _can_advance
 		button.tooltip_text = "Посетитель должен уйти, а передаточный блок — закрыться."
-	else:
+	elif parent == sidebar:
 		_text(parent,"Конец доступного фрагмента. Следующие обращения ещё в разработке.",16,MUTED)
 
 func _next_case() -> void:
@@ -764,6 +860,7 @@ func _button(parent: Node, text_value: String, callback: Callable) -> Button:
 func _action(parent: Node, text_value: String, callback: Callable) -> Button:
 	var button := _button(parent,text_value,callback)
 	button.add_theme_font_size_override("font_size",16)
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return button
 
 func _rule(parent: Node) -> void:
