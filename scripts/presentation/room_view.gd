@@ -2,6 +2,7 @@ extends Node3D
 ## The clerk is inside the cage. Presentation owns movement, never story state.
 
 signal target_clicked(target_id: String)
+signal hover_changed(target_id: String)
 signal visitor_arrived
 signal handover_finished
 
@@ -23,6 +24,7 @@ var reduced_motion: bool = false
 var _snapshot: Dictionary = {}
 var _has_snapshot: bool = false
 var _hovered: String = ""
+var _pointer_position := Vector2.ZERO
 var _highlights: Dictionary = {}
 var _visitor: Node3D
 var _visitor_geometry: Node3D
@@ -137,12 +139,15 @@ func get_visitor_focus_position() -> Vector3:
 	return _visitor.global_position + Vector3(0, _face_height, _face_depth) if is_instance_valid(_visitor) else VISITOR_WAIT + Vector3(0, _face_height, _face_depth)
 
 func set_hovered(target_id: String) -> void:
+	var changed := _hovered != target_id
 	_hovered = target_id
 	if is_instance_valid(_package):
 		_package.set_highlighted(target_id == "P01" and _package.visible and not transfer_active)
 	for key in _highlights:
 		var mesh: MeshInstance3D = _highlights[key]
 		mesh.visible = key == target_id
+	if changed:
+		hover_changed.emit(target_id)
 
 func _physics_process(_delta: float) -> void:
 	if not input_enabled or not is_visible_in_tree():
@@ -152,9 +157,14 @@ func _physics_process(_delta: float) -> void:
 		if not _hovered.is_empty():
 			set_hovered("")
 		return
-	var next_hovered := _pick(get_viewport().get_mouse_position())
+	var next_hovered := _pick(_pointer_position)
 	if next_hovered != _hovered:
 		set_hovered(next_hovered)
+
+func _input(event: InputEvent) -> void:
+	# Hover and clicks use the same viewport-local coordinates, including scaled windows.
+	if event is InputEventMouse:
+		_pointer_position = event.position
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not input_enabled or not is_visible_in_tree():

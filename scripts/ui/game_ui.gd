@@ -17,6 +17,7 @@ var sidebar: VBoxContainer
 var dialogue_text: RichTextLabel
 var objective: Label
 var hint: Label
+var interaction_hint: Label
 var modal: Control
 var modal_body: VBoxContainer
 var _modal_kind: String = ""
@@ -31,6 +32,8 @@ var _inspection_overview: Button
 var _inspection_turns: Array[Button] = []
 var _start_screen: Control
 var _action_panel: PanelContainer
+var _actions_button: Button
+var _hovered_target := ""
 var _hud: Control
 var _menu_status: Label
 var _booting := false
@@ -87,7 +90,8 @@ func _build_shell() -> void:
 	pause.offset_right = -24
 	pause.offset_top = 20
 	pause.offset_bottom = 58
-	var actions := _button(_hud,"Действия · F1",func(): _action_panel.visible = not _action_panel.visible)
+	var actions := _button(_hud,"Действия · F1",_toggle_actions)
+	_actions_button = actions
 	actions.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	actions.offset_left = -176
 	actions.offset_right = -24
@@ -125,9 +129,21 @@ func _build_shell() -> void:
 	hint.add_theme_color_override("font_shadow_color",Color("111b15"))
 	hint.add_theme_constant_override("shadow_offset_x",1)
 	hint.add_theme_constant_override("shadow_offset_y",1)
+	interaction_hint = _label(_hud,"",16,GOLD)
+	interaction_hint.name = "InteractionHint"
+	interaction_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	interaction_hint.offset_left = 26
+	interaction_hint.offset_top = -122
+	interaction_hint.offset_right = 1160
+	interaction_hint.offset_bottom = -96
+	interaction_hint.add_theme_color_override("font_shadow_color",Color("111b15"))
+	interaction_hint.add_theme_constant_override("shadow_offset_x",1)
+	interaction_hint.add_theme_constant_override("shadow_offset_y",1)
+	interaction_hint.hide()
 
 func render(state: Dictionary) -> void:
 	snapshot = state
+	_refresh_interaction_hint()
 	if not is_instance_valid(sidebar):
 		return
 	_clear(sidebar)
@@ -562,7 +578,9 @@ func _begin_modal(title: String, kind: String) -> void:
 	_close_modal()
 	_modal_kind = kind
 	hint.hide()
+	interaction_hint.hide()
 	_action_panel.hide()
+	_actions_button.disabled = true
 	modal = _panel(self,Color(0.025,0.035,0.028,0.83) if kind in ["dialogue","result"] else DARK)
 	modal.name = "ContentPanel"
 	var rect: Rect2
@@ -595,6 +613,8 @@ func _close_modal() -> void:
 	modal = null
 	_modal_kind = ""
 	hint.show()
+	_actions_button.disabled = false
+	_refresh_interaction_hint()
 	if is_instance_valid(_action_panel) and snapshot.get("started",false):
 		_action_panel.show()
 	modal_changed.emit(false)
@@ -624,7 +644,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not snapshot.get("started",false):
 		return
 	if event.keycode == KEY_F1:
-		_action_panel.visible = not _action_panel.visible
+		_toggle_actions()
+		get_viewport().set_input_as_handled()
 	var views := {KEY_1:"window",KEY_2:"shelf",KEY_3:"desk",KEY_4:"personal"}
 	if views.has(event.keycode):
 		_focus(views[event.keycode])
@@ -632,6 +653,30 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _show_hint(message: String) -> void:
 	if is_instance_valid(hint): hint.text = message
+
+func _toggle_actions() -> void:
+	if snapshot.get("started",false) and not is_instance_valid(modal):
+		_action_panel.visible = not _action_panel.visible
+
+func set_hovered_target(target_id: String) -> void:
+	_hovered_target = target_id
+	_refresh_interaction_hint()
+
+func _refresh_interaction_hint() -> void:
+	if not is_instance_valid(interaction_hint):
+		return
+	var text_value := ""
+	if snapshot.get("started",false) and snapshot.get("case_status","") == "active" and not is_instance_valid(modal):
+		match _hovered_target:
+			"P01":
+				text_value = "ЛКМ · Поставить переноску на стол" if snapshot.package.location == "shelf" else "ЛКМ · Открыть и осмотреть переноску"
+			"identity": text_value = "ЛКМ · Прочитать удостоверение"
+			"claim": text_value = "ЛКМ · Прочитать заявление"
+			"nina": text_value = "ЛКМ · Поговорить с Ниной"
+			"archive": text_value = "ЛКМ · Папка старых дел"
+			"hatch": text_value = "ЛКМ · Передаточный блок"
+	interaction_hint.text = text_value
+	interaction_hint.visible = not text_value.is_empty()
 
 func _create_audio() -> void:
 	_sound = AudioStreamPlayer.new()

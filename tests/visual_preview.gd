@@ -22,7 +22,7 @@ func _run() -> void:
 		quit(1)
 		return
 	RenderingServer.viewport_set_update_mode(root.get_viewport_rid(), RenderingServer.VIEWPORT_UPDATE_ALWAYS)
-	output_dir = ProjectSettings.globalize_path("res://tools/preview-04")
+	output_dir = ProjectSettings.globalize_path("res://tools/preview-05")
 	DirAccess.make_dir_recursive_absolute(output_dir)
 	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
@@ -105,9 +105,9 @@ func _run() -> void:
 	_check(frames.size() == 30, "All 27 baseline frames and three inspection focus/reset frames were saved")
 	var manifest := FileAccess.open(output_dir.path_join("manifest.json"), FileAccess.WRITE)
 	if manifest:
-		manifest.store_string(JSON.stringify({"iteration": "0.4", "baseline_frames": 23, "composition_frames": 4, "inspection_extra_frames": 3, "art_sources": art_sources, "frames": frames, "failures": failures}, "\t"))
+		manifest.store_string(JSON.stringify({"iteration": "0.5", "baseline_frames": 23, "composition_frames": 4, "inspection_extra_frames": 3, "art_sources": art_sources, "frames": frames, "failures": failures}, "\t"))
 	if failures.is_empty():
-		print("PASS: %d iteration 0.4 rendered previews and UI workflow checks. Inspect PNGs for visual quality." % frames.size())
+		print("PASS: %d iteration 0.5 rendered previews and UI workflow checks. Inspect PNGs for visual quality." % frames.size())
 	else:
 		for message in failures:
 			push_error(message)

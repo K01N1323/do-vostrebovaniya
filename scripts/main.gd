@@ -11,6 +11,7 @@ func _ready() -> void:
 	add_child(film)
 	GameStore.state_changed.connect(_on_state)
 	room.target_clicked.connect(game_ui.open_target)
+	room.hover_changed.connect(game_ui.set_hovered_target)
 	room.visitor_arrived.connect(game_ui.on_visitor_arrived)
 	game_ui.focus_requested.connect(camera_rig.focus)
 	camera_rig.view_changed.connect(room.set_view)
