@@ -5,9 +5,11 @@ signal target_clicked(target_id: String)
 signal hover_changed(target_id: String)
 signal visitor_arrived
 signal handover_finished
+signal visitor_departed
 
 const G = preload("res://scripts/presentation/geometry.gd")
 const CRATE_PROBE = preload("res://assets/models/crate_probe.glb")
+const Rules = preload("res://scripts/core/state_reducer.gd")
 const PACKAGE_POSITIONS := {
 	"shelf": Vector3(-1.65, 1.16, 0.65),
 	"desk": Vector3(-0.28, 0.94, -0.02),
@@ -39,6 +41,8 @@ var _outer_open: bool = false
 var _face_height: float = 1.56
 var _face_depth: float = 0.17
 var _view_id: String = "window"
+var _package_views: Dictionary = {}
+var _paper_titles: Dictionary = {}
 
 @onready var _package: Node3D = $Package
 
@@ -49,6 +53,10 @@ func _ready() -> void:
 	_build_cage()
 	_build_hatch()
 	_build_nina()
+	_package_views["P01"] = _package
+	var brick := preload("res://scenes/objects/brick_package.tscn").instantiate()
+	add_child(brick)
+	_package_views["P02"] = brick
 	_build_lighting()
 	var pending := _snapshot.duplicate(true)
 	_snapshot.clear()
@@ -67,39 +75,67 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 	var started := bool(snapshot.get("started", false))
 	var status := str(snapshot.get("case_status", "active"))
 	var previous_status := str(previous.get("case_status", "active"))
+	var changed_case: bool = had_previous and previous.get("case_id", "nina") != snapshot.case_id
 	var previous_package: Dictionary = previous.get("package", {})
 	var previous_location := str(previous_package.get("location", "shelf"))
 	var package_state: Dictionary = snapshot.get("package", {})
 	var location := str(package_state.get("location", "shelf"))
-	var restarted := had_previous and ((previous_started and not started) or (previous_status == "resolved" and status == "active"))
+	var restarted := had_previous and ((previous_started and not started) or (previous_status == "resolved" and status == "active" and not changed_case))
 	_snapshot = snapshot.duplicate(true)
 	_has_snapshot = true
-	if restarted:
+	if restarted or changed_case or not had_previous:
 		_cancel_animations()
+		set_hovered("")
+		_package = _package_views[package_state.id]
 		_package.rotation = Vector3.ZERO
 		_set_visitor_phase("absent")
+		_configure_visitor(snapshot.case_id)
+	_render_inactive_packages()
 	if not started:
 		_cancel_animations()
 		_set_visitor_phase("absent")
 	elif not had_previous:
 		_visitor.position = VISITOR_WAIT
 		_set_visitor_phase("gone" if status == "resolved" else "waiting")
-	elif not previous_started and started:
+	elif (not previous_started and started) or changed_case:
 		_start_arrival()
-	if location == "issued" and had_previous and previous_location == "desk" and not restarted:
+	if location == "issued" and had_previous and previous_location == "desk" and not restarted and not changed_case:
 		_start_handover()
 	elif not transfer_active:
 		_package.visible = location != "issued"
 		if PACKAGE_POSITIONS.has(location):
-			_package.position = PACKAGE_POSITIONS[location]
-		if restarted or not had_previous or location != previous_location:
+			_package.position = _package_position(package_state.id, location)
+		if restarted or changed_case or not had_previous or location != previous_location:
 			_package.rotation_degrees.y = 59.0 if location == "shelf" else (-45.0 if location == "personal" else 0.0)
 		_update_package_lid()
 		_set_package_picking(_package.visible)
 	if started and status == "resolved" and had_previous and previous_status != "resolved":
 		_start_departure()
-	if not _package.visible and _hovered == "P01":
+	if not _package.visible and _hovered == package_state.id:
 		set_hovered("")
+
+func _package_position(package_id: String, location: String) -> Vector3:
+	if package_id == "P02":
+		if location == "shelf":
+			return Vector3(-1.65, 2.06, 0.65)
+		if location == "personal":
+			return Vector3(1.55, 0.25, 1.05)
+	return PACKAGE_POSITIONS.get(location, Vector3.ZERO)
+
+func _render_inactive_packages() -> void:
+	var packages: Dictionary = Rules.all_packages(_snapshot)
+	for id in _package_views:
+		var view: Node3D = _package_views[id]
+		if view == _package:
+			continue
+		var item: Dictionary = packages[id]
+		view.visible = item.location != "issued"
+		view.position = _package_position(id, item.location)
+		view.rotation_degrees.y = 59 if item.location == "shelf" else -45
+		view.set_opened(false)
+		view.set_highlighted(false)
+		var target: StaticBody3D = view.get_node("Target_" + id)
+		target.collision_layer = 0
 
 func set_input_enabled(value: bool) -> void:
 	input_enabled = value
@@ -142,7 +178,7 @@ func set_hovered(target_id: String) -> void:
 	var changed := _hovered != target_id
 	_hovered = target_id
 	if is_instance_valid(_package):
-		_package.set_highlighted(target_id == "P01" and _package.visible and not transfer_active)
+		_package.set_highlighted(target_id == _snapshot.get("package", {}).get("id", "P01") and _package.visible and not transfer_active)
 	for key in _highlights:
 		var mesh: MeshInstance3D = _highlights[key]
 		mesh.visible = key == target_id
@@ -188,7 +224,7 @@ func _pick(screen_position: Vector2) -> String:
 	return str(collider.get_meta("target_id", ""))
 
 func _set_package_picking(value: bool) -> void:
-	var target: StaticBody3D = _package.get_node_or_null("Target_P01")
+	var target: StaticBody3D = _package.get_node_or_null("Target_" + str(_snapshot.get("package", {}).get("id", "P01")))
 	if is_instance_valid(target):
 		target.collision_layer = 1 if value else 0
 
@@ -198,6 +234,8 @@ func _set_visitor_phase(value: String) -> void:
 		_visitor.visible = value not in ["absent", "gone"]
 	if is_instance_valid(_visitor_target):
 		_visitor_target.collision_layer = 1 if value == "waiting" else 0
+	if value == "gone":
+		visitor_departed.emit()
 
 func _start_arrival() -> void:
 	if is_instance_valid(_visitor_tween):
@@ -346,7 +384,7 @@ func _build_shelf() -> void:
 	crate.scale = Vector3(0.50, 0.45, 0.5)
 	shelf.add_child(crate)
 	G.box(shelf, Vector3(0.45, 0.35, 0.47), Vector3(0.29, 0.50, 0), G.worn_material(Color("77755e"), "paper"))
-	G.box(shelf, Vector3(0.70, 0.22, 0.50), Vector3(-0.18, 2.17, 0), G.worn_material(Color("716a4d"), "paper"))
+	G.label(shelf, "П02", Vector3(0, 2.02, 0.412), 20, Color("c8b788"))
 	var folders := [Color("6b6552"), Color("82735b"), Color("626d67")]
 	for i in range(5):
 		var folder := G.box(shelf, Vector3(0.065, 0.27 + (i % 2) * 0.04, 0.35), Vector3(0.32 + i * 0.067, 2.21, -0.02), G.worn_material(folders[i % 3], "paper"))
@@ -374,6 +412,14 @@ func _build_desk() -> void:
 	G.box(self, Vector3(0.99, 0.07, 0.77), Vector3(0.60, 0.215, 0.65), dark)
 	for x in [0.15, 1.04]:
 		G.box(self, Vector3(0.06, 0.22, 0.71), Vector3(x, 0.11, 0.65), dark)
+	var second_stand := Node3D.new()
+	second_stand.name = "SecondPersonalStand"
+	second_stand.position = Vector3(1.55, 0, 1.05)
+	second_stand.rotation_degrees.y = -45
+	add_child(second_stand)
+	G.box(second_stand, Vector3(0.96, 0.07, 0.72), Vector3(0, 0.215, 0), dark)
+	for x in [-0.44, 0.44]:
+		G.box(second_stand, Vector3(0.05, 0.22, 0.66), Vector3(x, 0.11, 0), dark)
 	_build_paper("identity", Vector3(-0.69, 0.952, 0.28), -7, "УДОСТОВЕРЕНИЕ", Color("b8b097"))
 	_build_paper("claim", Vector3(-0.20, 0.953, 0.32), 6, "ЗАЯВЛЕНИЕ № 01", Color("b4ae94"))
 	var archive := Node3D.new()
@@ -401,6 +447,7 @@ func _build_paper(target_id: String, position: Vector3, angle: float, title: Str
 	for line_index in range(5):
 		G.box(paper, Vector3(0.24 if line_index % 2 == 0 else 0.18, 0.001, 0.003), Vector3(0.01, 0.005, -0.02 + line_index * 0.019), ink)
 	var text := G.label(paper, title, Vector3(0, 0.007, -0.078), 13, Color("3a493a"))
+	_paper_titles[target_id] = text
 	text.rotation_degrees.x = -90
 	text.pixel_size = 0.0016
 	G.target(paper, target_id, Vector3(0.41, 0.03, 0.28), Vector3(0, 0.01, 0))
@@ -565,6 +612,33 @@ func _load_nina_image_if_available() -> void:
 	_visitor_geometry.visible = false
 	_face_height = 1.600
 	_face_depth = 0.06
+
+func _configure_visitor(case_id: String) -> void:
+	if _paper_titles.has("claim"):
+		_paper_titles.claim.text = "ЗАЯВЛЕНИЕ № " + ("02" if case_id == "fedor" else "01")
+	if _paper_titles.has("identity"):
+		_paper_titles.identity.text = "ДОКУМЕНТ" if case_id == "fedor" else "УДОСТОВЕРЕНИЕ"
+	var nina := _visitor.get_node_or_null("NinaPortrait") as Sprite3D
+	if is_instance_valid(nina):
+		nina.visible = case_id == "nina"
+	var fedor := _visitor.get_node_or_null("FedorPortrait") as Sprite3D
+	if case_id == "fedor" and not is_instance_valid(fedor):
+		fedor = Sprite3D.new()
+		fedor.name = "FedorPortrait"
+		fedor.texture = preload("res://assets/characters/fedor-v1.png")
+		fedor.pixel_size = 1.84 / float(fedor.texture.get_height())
+		fedor.position = Vector3(0, 0.92, 0.06)
+		fedor.set_script(preload("res://scripts/presentation/visitor_portrait.gd"))
+		fedor.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		fedor.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+		fedor.alpha_scissor_threshold = 0.05
+		fedor.shaded = false
+		fedor.modulate = Color(0.66, 0.84, 0.88)
+		_visitor.add_child(fedor)
+	if is_instance_valid(fedor):
+		fedor.visible = case_id == "fedor"
+	_visitor_geometry.visible = not is_instance_valid(nina) and case_id == "nina"
+	_visitor_target.set_meta("target_id", case_id)
 
 func _build_lighting() -> void:
 	var world := WorldEnvironment.new()

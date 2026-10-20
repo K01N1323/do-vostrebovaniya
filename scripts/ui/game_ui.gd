@@ -4,6 +4,7 @@ signal focus_requested(view_id: String)
 signal modal_changed(blocked: bool)
 signal motion_changed(reduced: bool)
 
+const Cases = preload("res://scripts/core/case_definitions.gd")
 const Rules = preload("res://scripts/core/state_reducer.gd")
 const Paper = preload("res://scripts/ui/paper_sheet.gd")
 const INK := Color("272c27")
@@ -38,6 +39,7 @@ var _hud: Control
 var _menu_status: Label
 var _booting := false
 var _visitor_ready := false
+var _can_advance := false
 var _speech_parts: Array[String] = []
 var _speech_index := 0
 var _speech_choices: VBoxContainer
@@ -142,17 +144,22 @@ func _build_shell() -> void:
 	interaction_hint.hide()
 
 func render(state: Dictionary) -> void:
+	if snapshot.get("case_id", "nina") != state.case_id:
+		_visitor_ready = false
+		_can_advance = false
+		_hovered_target = ""
 	snapshot = state
 	_refresh_interaction_hint()
 	if not is_instance_valid(sidebar):
 		return
 	_clear(sidebar)
-	_label(sidebar,"ОБРАЩЕНИЕ 01",13,GOLD)
-	_label(sidebar,"Нина Лукина",21)
+	_label(sidebar,"ОБРАЩЕНИЕ " + _p().number,13,GOLD)
+	_label(sidebar,_p().name,21)
 	if state.case_status == "resolved":
 		objective.text = "Обращение завершено"
-		var outcomes := {"issue":"Переноска передана Нине.","retain":"Переноска осталась на полке.","appropriate":"Переноска в личном месте."}
+		var outcomes: Dictionary = _p().outcomes
 		_text(sidebar,outcomes.get(state.decision,""),17)
+		_add_next_button(sidebar)
 		_button(sidebar,"Начать заново",_restart)
 		return
 	objective.text = _next_step(state)
@@ -177,7 +184,7 @@ func _next_step(state: Dictionary) -> String:
 	if state.read_documents.size() < 2:
 		return "Сверьте бумаги посетителя"
 	if not state.package.opened or state.inspected_details.is_empty():
-		return "Осмотрите переноску на своём столе"
+		return "Осмотрите " + _p().item_accusative + " на своём столе"
 	return "Проверка завершена. Решение за вами"
 
 func on_visitor_arrived() -> void:
@@ -188,32 +195,31 @@ func on_visitor_arrived() -> void:
 func open_target(target_id: String) -> void:
 	if not snapshot.get("started",false) or (is_instance_valid(modal) and _modal_kind not in ["dialogue","result"]):
 		return
-	match target_id:
-		"P01":
-			if snapshot.case_status == "resolved":
-				_show_hint("Решение уже принято.")
-			elif snapshot.package.location == "shelf":
-				_move("desk")
-			else:
-				_show_inspection()
-		"identity","claim":
-			if snapshot.case_status == "active":
-				_show_document(target_id)
-		"nina":
-			if snapshot.case_status == "active":
-				_show_conversation()
-		"archive":
-			_show_hint("Старые дела. Сначала закончите обращение у окна.")
-		"sandwiches","saucer","napkin":
-			_inspect_detail(target_id)
-		"hatch":
-			_show_hint("Передаточный блок. Выдача — после проверки и явного решения.")
+	if target_id == snapshot.package.id:
+		if snapshot.case_status == "resolved":
+			_show_hint("Решение уже принято.")
+		elif snapshot.package.location == "shelf":
+			_move("desk")
+		else:
+			_show_inspection()
+	elif target_id == snapshot.case_id:
+		if snapshot.case_status == "active":
+			_show_conversation()
+	elif target_id in Cases.get_case(snapshot.case_id).details:
+		_inspect_detail(target_id)
+	elif target_id in ["identity", "claim"]:
+		if snapshot.case_status == "active":
+			_show_document(target_id)
+	elif target_id == "archive":
+		_show_hint("Старые дела. Сначала закончите обращение у окна.")
+	elif target_id == "hatch":
+		_show_hint("Передаточный блок. Выдача — после проверки и явного решения.")
 
 func _move(destination: String) -> void:
 	_close_modal()
 	if GameStore.dispatch({"type":"MOVE_PACKAGE","destination":destination}).ok:
 		_focus("desk" if destination == "desk" else "shelf")
-		_show_hint("Переноска на столе. Нажмите на неё для осмотра." if destination == "desk" else "Переноска возвращена на полку. Решение ещё не принято.")
+		_show_hint(_p().item_nominative + (" на столе. Нажмите для осмотра." if destination == "desk" else " на полке. Решение ещё не принято."))
 
 func _show_document(id: String) -> void:
 	if not GameStore.dispatch({"type":"READ_DOCUMENT","document_id":id}).ok:
@@ -228,7 +234,7 @@ func _show_document(id: String) -> void:
 func _show_comparison() -> void:
 	for id in ["identity","claim"]:
 		GameStore.dispatch({"type":"READ_DOCUMENT","document_id":id})
-	_begin_modal("Сверка бумаг · Нина Лукина","comparison")
+	_begin_modal("Сверка бумаг · " + _p().name,"comparison")
 	var row := HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	modal_body.add_child(row)
@@ -237,7 +243,7 @@ func _show_comparison() -> void:
 	_button(modal_body,"Вернуться к столу",_close_modal)
 
 func _document(parent: Node, record: Dictionary, id: String) -> void:
-	if id == "identity" and _modal_kind != "comparison":
+	if id == "identity" and _modal_kind != "comparison" and _p().get("identity_layout", "sheet") == "booklet":
 		_identity_booklet(parent,record)
 		return
 	var page := Paper.new()
@@ -250,7 +256,7 @@ func _document(parent: Node, record: Dictionary, id: String) -> void:
 	page.add_child(stack)
 	var head := HBoxContainer.new()
 	stack.add_child(head)
-	var title := _label(head,"АВТОВОКЗАЛ / 047" if id == "identity" else "ФОРМА БН–01",16,INK)
+	var title := _label(head,_p().document_header if id == "identity" else "ФОРМА БН–" + _p().number,16,INK)
 	title.add_theme_font_override("font",_typewriter_font)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_label(head,"15 / X",14,Color("65644e"))
@@ -263,7 +269,7 @@ func _document(parent: Node, record: Dictionary, id: String) -> void:
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_theme_color_override("default_color",INK)
 	body.add_theme_font_override("normal_font",_typewriter_font)
-	var seal := _label(stack,"БЮРО НАХОДОК  ·  ПРИНЯТО" if id == "claim" else "ХОЗЯЙСТВЕННАЯ СЛУЖБА",12,Color("704f42"))
+	var seal := _label(stack,"БЮРО НАХОДОК  ·  ПРИНЯТО" if id == "claim" else _p().identity_seal,12,Color("704f42"))
 	seal.add_theme_font_override("font",_typewriter_font)
 	seal.rotation = -0.018
 
@@ -284,7 +290,7 @@ func _identity_booklet(parent: Node, record: Dictionary) -> void:
 	var backing := _panel(portrait_column,Color("8c8c7a"))
 	var photo := TextureRect.new()
 	photo.name = "IdentityPhoto"
-	var source: Texture2D = load("res://assets/characters/nina-v2.png")
+	var source: Texture2D = load(_p().portrait)
 	var atlas := AtlasTexture.new()
 	atlas.atlas = source
 	atlas.region = Rect2(source.get_width()*0.32,source.get_height()*0.025,source.get_width()*0.39,source.get_height()*0.29)
@@ -318,7 +324,7 @@ func _show_inspection() -> void:
 	if not snapshot.package.opened:
 		if not GameStore.dispatch({"type":"OPEN_PACKAGE"}).ok:
 			return
-	_begin_modal("П01 · Переноска с обедом","inspection")
+	_begin_modal(_p().package_title,"inspection")
 	var row := HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	modal_body.add_child(row)
@@ -337,19 +343,20 @@ func _show_inspection() -> void:
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	box.add_child(viewport)
 	_inspection = load("res://scenes/objects/inspection_stage.tscn").instantiate()
+	_inspection.set_item(snapshot.package.id)
 	viewport.add_child(_inspection)
 	_inspection.set_opened(true)
 	_inspection.reduced_motion = _reduced
 	_inspection.detail_selected.connect(_inspect_detail)
 	_inspection.focus_changed.connect(_refresh_inspection_focus)
-	_inspection_caption = _label(left,"П01 · Общий вид",14,MUTED)
+	_inspection_caption = _label(left,"П" + _p().number + " · Общий вид",14,MUTED)
 	_inspection_caption.name = "InspectionCaption"
 	var turn := HBoxContainer.new()
 	left.add_child(turn)
 	_inspection_turns.clear()
 	_inspection_turns.append(_button(turn,"↶ Влево",func(): _inspection.rotate_item(-1.0)))
 	_inspection_turns.append(_button(turn,"Вправо ↷",func(): _inspection.rotate_item(1.0)))
-	_inspection_overview = _button(turn,"Вся переноска",func(): _inspection.reset_focus())
+	_inspection_overview = _button(turn,_p().overview,func(): _inspection.reset_focus())
 	_inspection_overview.name = "InspectionOverview"
 	_inspection_overview.disabled = true
 	for button in _inspection_turns + [_inspection_overview]:
@@ -360,7 +367,7 @@ func _show_inspection() -> void:
 	row.add_child(right)
 	_label(right,"ПРИЗНАКИ",13,GOLD)
 	_detail_buttons.clear()
-	for id in ["sandwiches","saucer","napkin"]:
+	for id in Cases.get_case(snapshot.case_id).details:
 		var detail_id: String = id
 		_detail_buttons[id] = _button(right,GameStore.content.details[id].title+(" ✓" if id in snapshot.inspected_details else ""),func(): _inspect_detail(detail_id))
 	var observation := _text(right,"Выберите предмет на изображении или признак справа, чтобы рассмотреть его ближе. Наблюдения сохранятся после осмотра.",18)
@@ -383,7 +390,7 @@ func _inspect_detail(id: String) -> void:
 
 func _refresh_inspection_focus(id: String) -> void:
 	if is_instance_valid(_inspection_caption):
-		_inspection_caption.text = "П01 · Общий вид" if id.is_empty() else "Крупный план · " + GameStore.content.details[id].title
+		_inspection_caption.text = ("П" + _p().number + " · Общий вид") if id.is_empty() else "Крупный план · " + GameStore.content.details[id].title
 	if is_instance_valid(_inspection_overview):
 		_inspection_overview.disabled = id.is_empty()
 	for button in _inspection_turns:
@@ -395,7 +402,7 @@ func _show_conversation() -> void:
 		return
 	_close_modal()
 	_focus("window")
-	_begin_modal("Нина Лукина","dialogue")
+	_begin_modal(_p().name,"dialogue")
 	dialogue_text = _text(modal_body,"",21)
 	dialogue_text.name = "SpeechText"
 	# A bounded text area avoids transient auto-height from an unlaid-out width.
@@ -434,11 +441,12 @@ func _refresh_speech() -> void:
 	modal.position.y = 560
 	var topics := HBoxContainer.new()
 	_speech_choices.add_child(topics)
-	for entry in [["carrier","Почему кошачья переноска?"],["old_room","Что разбирают в старой комнате?"],["lunch","Вы приготовили обед на троих?"]]:
-		var topic: String = entry[0]
-		if topic == "lunch" and "sandwiches" not in snapshot.inspected_details:
+	var definition: Dictionary = Cases.get_case(snapshot.case_id)
+	for id in definition.topics:
+		var topic: String = id
+		if definition.topic_requires.has(topic) and definition.topic_requires[topic] not in snapshot.inspected_details:
 			continue
-		var button := _button(topics,entry[1],func():
+		var button := _button(topics,GameStore.content.topic_labels[topic],func():
 			if GameStore.dispatch({"type":"ASK_TOPIC","topic_id":topic}).ok:
 				_set_speech(GameStore.content.dialogues[topic]))
 		button.add_theme_font_size_override("font_size",15)
@@ -447,32 +455,33 @@ func _refresh_speech() -> void:
 
 func _show_decision() -> void:
 	_begin_modal("Куда отправить находку?","decision")
-	_text(modal_body,"Обращение № 01 · Нина Лукина",16,MUTED)
+	_text(modal_body,"Обращение № " + _p().number + " · " + _p().name,16,MUTED)
 	var at_desk: bool = snapshot.package.location == "desk"
-	var issue := _button(modal_body,"Выдать переноску Нине Лукиной",func(): _decide("ISSUE_PACKAGE"))
+	var issue := _button(modal_body,_p().issue_caption,func(): _decide("ISSUE_PACKAGE"))
 	issue.disabled = not at_desk
 	_button(modal_body,"Завершить обращение · оставить на хранении",func(): _decide("RETAIN_PACKAGE"))
-	var appropriate := _button(modal_body,"Убрать под стол · присвоить переноску",func(): _decide("APPROPRIATE_PACKAGE"))
+	var appropriate := _button(modal_body,_p().appropriate_caption,func(): _decide("APPROPRIATE_PACKAGE"))
 	appropriate.disabled = not at_desk
 	if not at_desk:
-		_text(modal_body,"Для передачи сначала поставьте переноску на стол.",16)
+		_text(modal_body,"Для передачи сначала поставьте " + _p().item_accusative + " на стол.",16)
 	_button(modal_body,"Пока не решать",_close_modal)
 
 func _decide(type: String) -> void:
 	var command := {"type":type}
 	if type == "ISSUE_PACKAGE":
-		command.recipient = "nina"
+		command.recipient = snapshot.case_id
 	if not GameStore.dispatch(command).ok:
 		return
 	_close_modal()
 	_focus("window" if type == "ISSUE_PACKAGE" else ("shelf" if type == "RETAIN_PACKAGE" else "personal"))
 	_action_panel.hide()
 	_show_hint("Обращение завершено. Результат сохранён до закрытия игры.")
-	_begin_modal("Нина","result")
+	_begin_modal(_p().first_name,"result")
 	_text(modal_body,GameStore.content.reactions[snapshot.decision],21)
 	var buttons := HBoxContainer.new()
 	modal_body.add_child(buttons)
 	_button(buttons,"К работе",_close_modal)
+	_add_next_button(buttons)
 	_button(buttons,"Начать заново",_restart)
 
 func _make_start_screen() -> Control:
@@ -560,7 +569,7 @@ func _show_pause() -> void:
 	motion.toggled.connect(func(value: bool): _reduced=value; motion_changed.emit(value))
 	modal_body.add_child(motion)
 	_button(modal_body,"Продолжить",_close_modal)
-	_button(modal_body,"Начать обращение заново",_restart)
+	_button(modal_body,"Начать смену заново",_restart)
 	_button(modal_body,"В главное меню",_return_to_title)
 	_button(modal_body,"Выйти из игры",func(): get_tree().quit())
 
@@ -667,16 +676,45 @@ func _refresh_interaction_hint() -> void:
 		return
 	var text_value := ""
 	if snapshot.get("started",false) and snapshot.get("case_status","") == "active" and not is_instance_valid(modal):
-		match _hovered_target:
-			"P01":
-				text_value = "ЛКМ · Поставить переноску на стол" if snapshot.package.location == "shelf" else "ЛКМ · Открыть и осмотреть переноску"
-			"identity": text_value = "ЛКМ · Прочитать удостоверение"
-			"claim": text_value = "ЛКМ · Прочитать заявление"
-			"nina": text_value = "ЛКМ · Поговорить с Ниной"
-			"archive": text_value = "ЛКМ · Папка старых дел"
-			"hatch": text_value = "ЛКМ · Передаточный блок"
+		if _hovered_target == snapshot.package.id:
+			text_value = "ЛКМ · " + ("Поставить " + _p().item_accusative + " на стол" if snapshot.package.location == "shelf" else "Открыть и осмотреть " + _p().item_accusative)
+		elif _hovered_target == snapshot.case_id:
+			text_value = "ЛКМ · " + _p().talk_hint
+		else:
+			match _hovered_target:
+				"identity": text_value = "ЛКМ · Прочитать удостоверение"
+				"claim": text_value = "ЛКМ · Прочитать заявление"
+				"archive": text_value = "ЛКМ · Папка старых дел"
+				"hatch": text_value = "ЛКМ · Передаточный блок"
 	interaction_hint.text = text_value
 	interaction_hint.visible = not text_value.is_empty()
+
+func _p() -> Dictionary:
+	return GameStore.content.presentation
+
+func set_can_advance(value: bool) -> void:
+	_can_advance = value
+	for button in find_children("NextCase", "Button", true, false):
+		button.disabled = not value
+
+func _add_next_button(parent: Node) -> void:
+	if Cases.has_next(snapshot.case_id):
+		var button := _button(parent,"Следующий посетитель",_next_case)
+		button.name = "NextCase"
+		button.disabled = not _can_advance
+		button.tooltip_text = "Посетитель должен уйти, а передаточный блок — закрыться."
+	else:
+		_text(parent,"Конец доступного фрагмента. Следующие обращения ещё в разработке.",16,MUTED)
+
+func _next_case() -> void:
+	if not _can_advance or snapshot.case_status != "resolved":
+		return
+	_close_modal()
+	_visitor_ready = false
+	_can_advance = false
+	if GameStore.dispatch({"type":"NEXT_CASE"}).ok:
+		_focus("window")
+		_show_hint("Следующий посетитель подходит к стойке.")
 
 func _create_audio() -> void:
 	_sound = AudioStreamPlayer.new()

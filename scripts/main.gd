@@ -13,6 +13,8 @@ func _ready() -> void:
 	room.target_clicked.connect(game_ui.open_target)
 	room.hover_changed.connect(game_ui.set_hovered_target)
 	room.visitor_arrived.connect(game_ui.on_visitor_arrived)
+	room.visitor_departed.connect(_refresh_transition)
+	room.handover_finished.connect(_refresh_transition)
 	game_ui.focus_requested.connect(camera_rig.focus)
 	camera_rig.view_changed.connect(room.set_view)
 	game_ui.modal_changed.connect(func(blocked: bool):
@@ -28,3 +30,7 @@ func _ready() -> void:
 func _on_state(snapshot: Dictionary) -> void:
 	room.apply_snapshot(snapshot)
 	game_ui.render(snapshot)
+	_refresh_transition()
+
+func _refresh_transition() -> void:
+	game_ui.set_can_advance(room.visitor_phase == "gone" and not room.transfer_active)
