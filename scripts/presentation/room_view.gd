@@ -60,6 +60,9 @@ func _ready() -> void:
 	var suitcase := preload("res://scenes/objects/suitcase.tscn").instantiate()
 	add_child(suitcase)
 	_package_views["P03"] = suitcase
+	var camera_bag := preload("res://scenes/objects/camera_bag.tscn").instantiate()
+	add_child(camera_bag)
+	_package_views["P04"] = camera_bag
 	_build_lighting()
 	var pending := _snapshot.duplicate(true)
 	_snapshot.clear()
@@ -118,6 +121,11 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 		set_hovered("")
 
 func _package_position(package_id: String, location: String) -> Vector3:
+	if package_id == "P04":
+		if location == "shelf":
+			return Vector3(-2.14, 1.16, 1.46)
+		if location == "personal":
+			return Vector3(1.55, 0.25, 0.18)
 	if package_id == "P03" and location == "shelf":
 		return Vector3(-1.55, 0.32, 0.48)
 	if package_id == "P02":
@@ -389,6 +397,11 @@ func _build_shelf() -> void:
 	for height in [0.28, 1.12, 2.02, 2.36]:
 		G.box(shelf, Vector3(1.4, 0.08, 0.75), Vector3(0, height, 0), wood)
 		G.box(shelf, Vector3(1.4, 0.07, 0.025), Vector3(0, height, 0.39), G.worn_material(Color("77725a"), "wood"))
+	# A small side bracket gives the grocery bag its own slot, clear of P01/P03.
+	G.box(shelf, Vector3(0.68, 0.08, 0.66), Vector3(-0.99, 1.12, 0), wood)
+	for x in [-1.26, -0.72]:
+		G.rod(shelf, Vector3(x, 0.75, -0.28), Vector3(x, 1.08, 0.24), 0.018, G.worn_material(Color("555b4d"), "metal"))
+	G.label(shelf, "П04", Vector3(-0.99, 1.12, 0.35), 20, Color("c8b788"))
 	var crate: Node3D = CRATE_PROBE.instantiate()
 	crate.name = "ImportedCrateProbe"
 	crate.position = Vector3(-0.46, 0.49, 0)
@@ -431,6 +444,14 @@ func _build_desk() -> void:
 	G.box(second_stand, Vector3(0.96, 0.07, 0.72), Vector3(0, 0.215, 0), dark)
 	for x in [-0.44, 0.44]:
 		G.box(second_stand, Vector3(0.05, 0.22, 0.66), Vector3(x, 0.11, 0), dark)
+	var third_stand := Node3D.new()
+	third_stand.name = "ThirdPersonalStand"
+	third_stand.position = Vector3(1.55, 0, 0.18)
+	third_stand.rotation_degrees.y = -45
+	add_child(third_stand)
+	G.box(third_stand, Vector3(0.75, 0.07, 0.64), Vector3(0, 0.215, 0), dark)
+	for x in [-0.32, 0.32]:
+		G.box(third_stand, Vector3(0.05, 0.22, 0.58), Vector3(x, 0.11, 0), dark)
 	_build_paper("identity", Vector3(-0.69, 0.952, 0.28), -7, "УДОСТОВЕРЕНИЕ", Color("b8b097"))
 	_build_paper("claim", Vector3(-0.20, 0.953, 0.32), 6, "ЗАЯВЛЕНИЕ № 01", Color("b4ae94"))
 	var archive := Node3D.new()
@@ -629,9 +650,9 @@ func _configure_visitor(case_id: String) -> void:
 	if _paper_titles.has("claim"):
 		_paper_titles.claim.text = ("ЗАЯВЛЕНИЯ № " if case_id == "melnikovs" else "ЗАЯВЛЕНИЕ № ") + presentation.number
 	if _paper_titles.has("identity"):
-		_paper_titles.identity.text = "ДОКУМЕНТЫ · 2" if case_id == "melnikovs" else ("ДОКУМЕНТ" if case_id == "fedor" else "УДОСТОВЕРЕНИЕ")
+		_paper_titles.identity.text = "ДОКУМЕНТЫ · 2" if case_id == "melnikovs" else ("ДОКУМЕНТ" if case_id in ["fedor", "gleb"] else "УДОСТОВЕРЕНИЕ")
 	var portrait_name := case_id.capitalize() + "Portrait"
-	for name_value in ["NinaPortrait", "FedorPortrait", "MelnikovsPortrait"]:
+	for name_value in ["NinaPortrait", "FedorPortrait", "MelnikovsPortrait", "GlebPortrait"]:
 		var existing := _visitor.get_node_or_null(name_value) as Sprite3D
 		if is_instance_valid(existing):
 			existing.visible = name_value == portrait_name

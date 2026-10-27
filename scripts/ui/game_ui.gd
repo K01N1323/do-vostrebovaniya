@@ -201,6 +201,10 @@ func _next_step(state: Dictionary) -> String:
 			return "Откройте замок чемодана на столе"
 		if "green_stain" not in state.inspected_details or "zipper" not in state.inspected_details:
 			return "Проверьте пятно и деталь под подкладкой"
+	if state.case_id == "gleb":
+		for id in Cases.get_case("gleb").required_details:
+			if id not in state.inspected_details:
+				return "Сопоставьте описание с камерой, ремешком и содержимым"
 	if not state.package.opened or state.inspected_details.is_empty():
 		return "Осмотрите " + _p().item_accusative + " на своём столе"
 	return "Проверка завершена. Решение за вами"
@@ -260,6 +264,9 @@ func _show_comparison(selected: Array = []) -> void:
 	if documents.size() > 2:
 		modal.position = Vector2(36,118)
 		modal.size = Vector2(1100,680)
+	elif snapshot.case_id == "gleb":
+		modal.position = Vector2(36,420)
+		modal.size = Vector2(1100,400)
 	for offset in range(0, documents.size(), 2):
 		var row := HBoxContainer.new()
 		row.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -526,10 +533,11 @@ func _refresh_speech() -> void:
 		modal.position.y = 605
 		_button(_speech_choices,"Далее",func(): _speech_index+=1; _refresh_speech())
 		return
-	modal.size.y = 320 if snapshot.case_id == "melnikovs" else 260
-	modal.position.y = 500 if snapshot.case_id == "melnikovs" else 560
+	var many_topics: bool = Cases.get_case(snapshot.case_id).topics.size() > 3
+	modal.size.y = 320 if many_topics else 260
+	modal.position.y = 500 if many_topics else 560
 	var topics := GridContainer.new()
-	topics.columns = 2 if snapshot.case_id == "melnikovs" else 3
+	topics.columns = 2 if many_topics else 3
 	_speech_choices.add_child(topics)
 	var definition: Dictionary = Cases.get_case(snapshot.case_id)
 	for id in definition.topics:

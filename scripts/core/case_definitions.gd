@@ -1,7 +1,7 @@
 extends RefCounted
 ## Rules and stable IDs. Prose and captions live in data/<case>.json.
 
-const ORDER: Array[String] = ["nina", "fedor", "melnikovs"]
+const ORDER: Array[String] = ["nina", "fedor", "melnikovs", "gleb"]
 const CASES := {
 	"nina": {"package_id": "P01", "documents": ["identity", "claim"], "recipients": ["nina"], "allow_appropriate": true,
 		"details": ["sandwiches", "saucer", "napkin"],
@@ -12,7 +12,11 @@ const CASES := {
 	"melnikovs": {"package_id": "P03", "documents": ["vera_identity", "vera_claim", "leonid_identity", "leonid_claim"],
 		"recipients": ["vera", "leonid"], "allow_appropriate": false, "lock_code": "246",
 		"details": ["combination", "green_stain", "zipper"], "required_details": ["green_stain", "zipper"], "required_topics": ["lock_code"],
-		"topics": ["journey", "lock_code", "parting", "lining_story"], "topic_requires": {"lining_story": "zipper"}}
+		"topics": ["journey", "lock_code", "parting", "lining_story"], "topic_requires": {"lining_story": "zipper"}},
+	"gleb": {"package_id": "P04", "documents": ["identity", "claim"], "recipients": ["gleb"], "allow_appropriate": true,
+		"details": ["camera_body", "strap", "onions"], "required_details": ["camera_body", "strap", "onions"],
+		"topics": ["repair", "work", "body_mismatch", "film_mismatch"],
+		"topic_requires": {"body_mismatch": "camera_body", "film_mismatch": "onions"}}
 }
 
 static func get_case(case_id: String) -> Dictionary:

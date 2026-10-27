@@ -129,7 +129,7 @@ func _play_melnikovs(recipient: String) -> bool:
 	var caption: String = {"vera":"Выдать чемодан Вере Мельниковой","leonid":"Выдать чемодан Леониду Мельникову","":"Завершить обращение · оставить на хранении"}[recipient]
 	await _click_caption(caption)
 	_expect(store.get_snapshot().recipient == recipient and store.get_snapshot().case_status == "resolved", "chosen recipient recorded: " + name_value)
-	_expect(_find_button(ui,"Следующий посетитель") == null, "no next button beyond implemented cases")
+	_expect(is_instance_valid(_find_button(ui,"Следующий посетитель")), "next case is available after the shared case")
 	await _capture(name_value + "-shared-result")
 	await _key(KEY_ESCAPE)
 	var safe := true
@@ -140,7 +140,7 @@ func _play_melnikovs(recipient: String) -> bool:
 		await process_frame
 	_expect(safe and room.visitor_phase == "gone" and not room.transfer_active, "shared case leaves through protected block")
 	var final_packages: Dictionary = Rules.all_packages(store.get_snapshot())
-	_expect(final_packages.P01 == prior.P01 and final_packages.P02 == prior.P02 and final_packages.size() == 3, "shared decision preserves two previous package outcomes")
+	_expect(final_packages.P01 == prior.P01 and final_packages.P02 == prior.P02 and final_packages.size() == 4, "shared decision preserves two previous package outcomes")
 	_expect(final_packages.P03.location == ("shelf" if recipient.is_empty() else "issued"), "P03 remains a single package")
 	await _key(KEY_2)
 	await _settle()

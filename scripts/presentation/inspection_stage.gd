@@ -21,6 +21,11 @@ const SUITCASE_VIEWS := {
 	"green_stain": {"eye": Vector3(-0.23, 0.64, 0.45), "at": Vector3(-0.16, 0.042, 0.01), "fov": 33.0},
 	"zipper": {"eye": Vector3(0.42, 0.37, 0.39), "at": Vector3(0.23, 0.05, 0.08), "fov": 25.0}
 }
+const CAMERA_BAG_VIEWS := {
+	"camera_body": {"eye": Vector3(0.02, 0.46, 0.56), "at": Vector3(0.025, 0.18, 0.015), "fov": 31.0},
+	"strap": {"eye": Vector3(-0.39, 0.43, 0.44), "at": Vector3(-0.17, 0.075, 0.12), "fov": 26.0},
+	"onions": {"eye": Vector3(0.30, 0.73, 0.41), "at": Vector3(0.07, 0.08, -0.05), "fov": 37.0}
+}
 var _package_id := "P01"
 var _pending_lining := false
 
@@ -53,6 +58,10 @@ func _ready() -> void:
 		$Camera3D.position = Vector3(0.04, 0.95, 1.15)
 		$Camera3D.look_at(Vector3(0, 0.17, -0.03), Vector3.UP)
 		$Camera3D.fov = 45
+	elif _package_id == "P04":
+		$Camera3D.position = Vector3(0.03, 0.91, 0.89)
+		$Camera3D.look_at(Vector3(0, 0.14, 0), Vector3.UP)
+		$Camera3D.fov = 44
 	_overview = $Camera3D.transform
 	_overview_fov = $Camera3D.fov
 	var environment := WorldEnvironment.new()
@@ -75,11 +84,15 @@ func set_item(package_id: String = "P01") -> void:
 func _swap_package() -> void:
 	_pivot.remove_child(_package)
 	_package.queue_free()
-	_package = (preload("res://scenes/objects/brick_package.tscn") if _package_id == "P02" else preload("res://scenes/objects/suitcase.tscn")).instantiate()
+	var scenes := {"P02": preload("res://scenes/objects/brick_package.tscn"),
+		"P03": preload("res://scenes/objects/suitcase.tscn"), "P04": preload("res://scenes/objects/camera_bag.tscn")}
+	_package = scenes[_package_id].instantiate()
 	_package.name = "Package"
 	_pivot.add_child(_package)
 
 func _views() -> Dictionary:
+	if _package_id == "P04":
+		return CAMERA_BAG_VIEWS
 	if _package_id == "P03":
 		return SUITCASE_VIEWS
 	return BRICK_VIEWS if _package_id == "P02" else DETAIL_VIEWS

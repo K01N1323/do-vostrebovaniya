@@ -88,9 +88,10 @@ func _run() -> void:
 				_expect(state.package.location == ("shelf" if recipient.is_empty() else "issued"), "P03 has exactly one resulting location")
 				_expect(state.completed_cases == history, "third decision cannot rewrite first two cases")
 				var final_packages: Dictionary = Rules.all_packages(state)
-				_expect(final_packages.size() == 3 and final_packages.P01 == packages.P01 and final_packages.P02 == packages.P02, "previous package states are unchanged")
+				_expect(final_packages.size() == 4 and final_packages.P01 == packages.P01 and final_packages.P02 == packages.P02, "previous package states are unchanged")
 				_reject(state, {"type":"ISSUE_PACKAGE","recipient":"leonid" if recipient == "vera" else "vera"})
-				_reject(state, {"type":"NEXT_CASE"})
+				var advanced := _apply(state, {"type":"NEXT_CASE"})
+				_expect(advanced.case_id == "gleb" and advanced.completed_cases.melnikovs.recipient == recipient, "Gleb follows and preserves shared recipient")
 				_expect(_apply(state, {"type":"RESTART"}) == Rules.initial_state(), "restart clears recipients and all history")
 	for failure in failures:
 		push_error(failure)
