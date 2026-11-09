@@ -107,11 +107,13 @@ func _play_gleb(decision: String) -> bool:
 	if decision != "retain":
 		await _click_caption("Поставить на стол")
 	await _click_caption("Принять решение")
+	await _settle()
 	await _capture(decision + "-gleb-decision")
 	var captions := {"issue":"Выдать сумку Глебу Корнееву", "retain":"Завершить обращение · оставить на хранении", "appropriate":"Убрать под стол · присвоить сумку"}
 	await _click_caption(captions[decision])
 	_expect(store.get_snapshot().decision == decision and store.get_snapshot().case_status == "resolved", "Gleb outcome " + decision + " remains a deliberate possible action")
-	_expect(_find_button(ui,"Следующий посетитель") == null, "available fragment ends after Gleb")
+	var next := _find_button(ui,"Следующий посетитель")
+	_expect(is_instance_valid(next) and next.disabled, "Serov waits for Gleb to depart")
 	await _capture(decision + "-gleb-result")
 	await _key(KEY_ESCAPE)
 	var safe := true
@@ -122,7 +124,7 @@ func _play_gleb(decision: String) -> bool:
 		await process_frame
 	_expect(safe and room.visitor_phase == "gone" and not room.transfer_active, "Gleb departs and transfer doors never open together")
 	var final: Dictionary = Rules.all_packages(store.get_snapshot())
-	_expect(final.size() == 4 and final.P01 == prior.P01 and final.P02 == prior.P02 and final.P03 == prior.P03, "Gleb outcome preserves all three earlier package locations")
+	_expect(final.size() == 7 and final.P01 == prior.P01 and final.P02 == prior.P02 and final.P03 == prior.P03, "Gleb outcome preserves all three earlier package locations")
 	_expect(store.get_snapshot().completed_cases.nina == history.nina and store.get_snapshot().completed_cases.fedor == history.fedor, "Gleb never changes archived earlier stories")
 	_expect(final.P04.location == {"issue":"issued","retain":"shelf","appropriate":"personal"}[decision], "one bag has one physical destination")
 	await _key(KEY_2 if decision == "retain" else (KEY_4 if decision == "appropriate" else KEY_1))

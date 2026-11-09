@@ -79,6 +79,8 @@ func _play_fedor(decision: String) -> bool:
 		var container := stage.get_viewport().get_parent() as SubViewportContainer
 		var point := container.get_global_transform_with_canvas() * camera.unproject_position(detail.global_position)
 		await _click_at(point)
+		_expect(id not in store.get_snapshot().inspected_details, "preview alone does not record " + id)
+		await _click_caption("Отметить наблюдение")
 		_expect(id in store.get_snapshot().inspected_details and stage.get_focus_id() == id, "3D click inspects Fedor detail: " + id)
 		await _settle()
 		await _capture(decision + "-fedor-" + id)

@@ -90,8 +90,7 @@ func _play_melnikovs(recipient: String) -> bool:
 	var stage: Node3D = ui.get("_inspection")
 	await _settle()
 	await _capture(name_value + "-suitcase-overview")
-	var zipper_button := _find_button(ui,"Язычок под подкладкой")
-	_expect(is_instance_valid(zipper_button) and zipper_button.disabled, "hidden zipper cannot be inspected before lifting")
+	_expect(not stage.can_focus_detail("zipper"), "hidden zipper cannot be inspected before lifting")
 	for id in ["combination", "green_stain"]:
 		await _click_stage(stage,id)
 		_expect(id in store.get_snapshot().inspected_details and stage.get_focus_id() == id, "3D inspection of " + id)
@@ -101,7 +100,7 @@ func _play_melnikovs(recipient: String) -> bool:
 		await _settle()
 	await _click_stage(stage,"lining")
 	_expect(store.get_snapshot().package.lining_lifted and "zipper" not in store.get_snapshot().inspected_details, "3D click lifts lining without automatically inspecting the pull")
-	_expect(not zipper_button.disabled, "lifting enables hidden detail")
+	_expect(stage.can_focus_detail("zipper"), "lifting enables hidden detail")
 	await _settle()
 	await _capture(name_value + "-raised-lining")
 	await _click_stage(stage,"zipper")
@@ -140,7 +139,7 @@ func _play_melnikovs(recipient: String) -> bool:
 		await process_frame
 	_expect(safe and room.visitor_phase == "gone" and not room.transfer_active, "shared case leaves through protected block")
 	var final_packages: Dictionary = Rules.all_packages(store.get_snapshot())
-	_expect(final_packages.P01 == prior.P01 and final_packages.P02 == prior.P02 and final_packages.size() == 4, "shared decision preserves two previous package outcomes")
+	_expect(final_packages.P01 == prior.P01 and final_packages.P02 == prior.P02 and final_packages.size() == 7, "shared decision preserves two previous package outcomes")
 	_expect(final_packages.P03.location == ("shelf" if recipient.is_empty() else "issued"), "P03 remains a single package")
 	await _key(KEY_2)
 	await _settle()
@@ -164,3 +163,6 @@ func _click_stage(stage: Node3D, id: String) -> void:
 	var camera := stage.get_node("Camera3D") as Camera3D
 	var container := stage.get_viewport().get_parent() as SubViewportContainer
 	await _click_at(container.get_global_transform_with_canvas() * camera.unproject_position(target.global_position))
+	if id != "lining" and _find_button(ui, "Отметить наблюдение") != null:
+		_expect(stage.get_focus_id() == id, "world click previews " + id)
+		await _click_caption("Отметить наблюдение")

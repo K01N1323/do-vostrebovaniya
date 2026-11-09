@@ -55,9 +55,10 @@ func _run() -> void:
 					_expect(state.recipient == ("gleb" if choice == "ISSUE_PACKAGE" else ""), "recipient is claimant, not a rewritten owner")
 					_expect(state.completed_cases == history, "fourth choice keeps all earlier stories byte-for-byte")
 					var final: Dictionary = Rules.all_packages(state)
-					_expect(final.size() == 4 and final.P01 == packages.P01 and final.P02 == packages.P02 and final.P03 == packages.P03, "four independent package locations survive all 81 routes")
+					_expect(final.size() == 7 and final.P01 == packages.P01 and final.P02 == packages.P02 and final.P03 == packages.P03, "four independent package locations survive all 81 routes")
 					_reject(state, {"type":"ISSUE_PACKAGE","recipient":"gleb"})
-					_reject(state, {"type":"NEXT_CASE"})
+					var serov := _apply(state, {"type":"NEXT_CASE"})
+					_expect(serov.case_id == "serov" and serov.completed_cases.gleb.package == final.P04, "Serov follows Gleb with the exact bag outcome")
 					_expect(_apply(state, {"type":"RESTART"}) == Rules.initial_state(), "restart clears the four-case shift")
 	for failure in failures:
 		push_error(failure)

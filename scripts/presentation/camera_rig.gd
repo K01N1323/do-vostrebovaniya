@@ -5,6 +5,9 @@ signal view_changed(view_id: String)
 
 const EYE := Vector3(0, 1.62, 1.25)
 const VIEWS := {
+	"archive": {"target": Vector3(-0.83, 1.07, -0.24), "fov": 51.0},
+	"personal_bag": {"target": Vector3(0.68, 0.62, -0.12), "fov": 46.0},
+	"bus": {"target": Vector3(-0.58, 1.52, -4.60), "fov": 30.0},
 	"window": {"target": Vector3(0.02, 1.58, -0.94), "fov": 42.0},
 	"desk": {"target": Vector3(-0.28, 1.06, -0.02), "fov": 64.0},
 	"shelf": {"target": Vector3(-1.65, 1.40, 0.65), "fov": 82.0},

@@ -153,9 +153,10 @@ func _inspection_focus_frames() -> void:
 	var overview: Transform3D = camera.transform
 	var overview_fov: float = camera.fov
 	_check(stage.call("get_focus_id") == "", "Inspection starts with the entire carrier")
-	for detail in [["sandwiches", "Три бутерброда", "10-detail"], ["saucer", "Край блюдца", "10b-saucer-close"], ["napkin", "Голубая заплата", "10c-napkin-close"]]:
-		await _click(_find(ui.modal, detail[1]))
-		await _frame(detail[2], 0.45)
+	for detail in [["sandwiches", "10-detail"], ["saucer", "10b-saucer-close"], ["napkin", "10c-napkin-close"]]:
+		await _click(_find(ui.modal, "Следующий ракурс"))
+		await _click(_find(ui.modal, "Отметить наблюдение"))
+		await _frame(detail[1], 0.45)
 		_check(stage.call("get_focus_id") == detail[0], "Detail button focuses " + detail[0])
 		_check(detail[0] in store.get_snapshot().inspected_details, "Detail button records " + detail[0])
 		_check(not camera.transform.is_equal_approx(overview) or not is_equal_approx(camera.fov, overview_fov), "Detail camera differs from overview for " + detail[0])

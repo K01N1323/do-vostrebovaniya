@@ -116,19 +116,46 @@ func _play_case(decision: String) -> bool:
 	var container := stage.get_viewport().get_parent() as SubViewportContainer
 	var detail := stage.find_child("Target_napkin", true, false) as Node3D
 	await _settle()
+	var pivot := stage.get_node("Pivot") as Node3D
+	var point := container.get_global_rect().get_center()
+	var motion := InputEventMouseMotion.new()
+	motion.position = point
+	motion.global_position = point
+	motion.relative = Vector2(72, 24)
+	motion.button_mask = MOUSE_BUTTON_MASK_RIGHT
+	root.push_input(motion, true)
+	for pressed in [true, false]:
+		var drag := InputEventMouseButton.new()
+		drag.button_index = MOUSE_BUTTON_RIGHT
+		drag.button_mask = MOUSE_BUTTON_MASK_RIGHT if pressed else 0
+		drag.pressed = pressed
+		drag.position = point
+		drag.global_position = point
+		root.push_input(drag, true)
+		if pressed:
+			root.push_input(motion, true)
+		await process_frame
+	_expect(not is_zero_approx(pivot.rotation.y), "right drag rotates the item through the inspection viewport")
+	pivot.rotation = Vector3.ZERO
+	await physics_frame
 	var local_point := detail_camera.unproject_position(detail.global_position)
 	var root_point := container.get_global_transform_with_canvas() * local_point
 	await _click_at(root_point)
-	if not _expect("napkin" in store.get_snapshot().inspected_details and stage.get_focus_id() == "napkin", "SubViewport click inspects and focuses the blue patch"):
+	if not _expect("napkin" not in store.get_snapshot().inspected_details and stage.get_focus_id() == "napkin", "SubViewport click focuses the patch without recording it"):
 		await _capture(decision + "-inspection-failed")
 		return false
+	_expect(_find_button(ui, "Голубая заплата") == null, "the clue label is unavailable before recording")
+	await _click_caption("Отметить наблюдение")
+	_expect("napkin" in store.get_snapshot().inspected_details, "recording the focused patch stores its evidence")
 	await _capture(decision + "-close-up")
 	await _click_caption("Вся переноска")
 	await _settle()
 	_expect(stage.get_focus_id() == "", "mouse restores overview")
-	await _click_caption("Три бутерброда")
+	await _click_caption("Следующий ракурс")
 	await _settle()
-	_expect(stage.get_focus_id() == "sandwiches" and "sandwiches" in store.get_snapshot().inspected_details, "detail button focuses sandwiches through GUI")
+	_expect(stage.get_focus_id() == "sandwiches" and "sandwiches" not in store.get_snapshot().inspected_details, "alternate view focuses sandwiches without recording")
+	await _click_caption("Отметить наблюдение")
+	_expect("sandwiches" in store.get_snapshot().inspected_details, "alternate view can be recorded")
 	await _key(KEY_ESCAPE)
 	_expect(not is_instance_valid(ui.modal), "Escape closes inspection")
 	if decision == "issue":
@@ -141,6 +168,7 @@ func _play_case(decision: String) -> bool:
 			if _find_button(ui, "Далее") == null:
 				break
 			await _click_caption("Далее")
+		await _settle()
 		await _click_caption("Вы приготовили обед на троих?")
 		_expect("lunch" in store.get_snapshot().asked_topics, "conversation question is recorded through mouse input")
 		await _capture("issue-lunch-conversation")

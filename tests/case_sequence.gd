@@ -27,7 +27,7 @@ func _reject(state: Dictionary, command: Dictionary) -> void:
 
 func _verify(state: Dictionary, package_id: String, location: String) -> void:
 	var packages: Dictionary = Rules.all_packages(state)
-	_expect(packages.size() == 4 and packages.has("P01") and packages.has("P02") and packages.has("P03") and packages.has("P04"), "one entry per package")
+	_expect(packages.size() == 7 and packages.has("P01") and packages.has("P02") and packages.has("P03") and packages.has("P04"), "one entry per package")
 	_expect(packages[package_id].location == location, package_id + " retains its location")
 	packages[package_id].location = "corrupted"
 	_expect(Rules.all_packages(state)[package_id].location == location, "derived package view cannot change state")
@@ -49,6 +49,10 @@ func _run() -> void:
 			state = _apply(state, {"type":nina_choice, "recipient":"nina"})
 			var nina_record := state.duplicate(true)
 			nina_record.erase("completed_cases")
+			nina_record.erase("loose_finds")
+			nina_record.erase("preview_finds")
+			nina_record.erase("old_act_read")
+			nina_record.erase("card_location")
 			state = _apply(state, {"type":"NEXT_CASE"})
 			_expect(state.case_id == "fedor" and state.package.id == "P02", "Nina advances to Fedor/P02")
 			_expect(state.read_documents.is_empty() and state.inspected_details.is_empty() and state.asked_topics.is_empty(), "Fedor starts without Nina knowledge")

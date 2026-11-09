@@ -1,31 +1,12 @@
 extends Node3D
 ## Instantiate this scene in an isolated SubViewport with own_world_3d = true.
 
+const Packages = preload("res://scripts/presentation/package_registry.gd")
 const G = preload("res://scripts/presentation/geometry.gd")
 
 signal detail_selected(detail_id: String)
 signal focus_changed(detail_id: String)
 
-const DETAIL_VIEWS := {
-	"sandwiches": {"eye": Vector3(0.10, 0.76, 0.70), "at": Vector3(0.04, 0.17, -0.01), "fov": 35.0},
-	"saucer": {"eye": Vector3(0.31, 0.46, 0.57), "at": Vector3(0.19, 0.135, 0.18), "fov": 35.0},
-	"napkin": {"eye": Vector3(-0.37, 0.33, 0.43), "at": Vector3(-0.29, 0.10, 0.18), "fov": 36.0}
-}
-const BRICK_VIEWS := {
-	"corner": {"eye": Vector3(-0.49, 0.40, 0.48), "at": Vector3(-0.21, 0.13, 0.09), "fov": 35.0},
-	"paint": {"eye": Vector3(0.07, 0.78, 0.45), "at": Vector3(0.025, 0.23, -0.005), "fov": 32.0},
-	"collar": {"eye": Vector3(0.43, 0.40, 0.48), "at": Vector3(0.28, 0.058, 0.16), "fov": 29.0}
-}
-const SUITCASE_VIEWS := {
-	"combination": {"eye": Vector3(0, 0.29, 0.76), "at": Vector3(0, 0.125, 0.27), "fov": 31.0},
-	"green_stain": {"eye": Vector3(-0.23, 0.64, 0.45), "at": Vector3(-0.16, 0.042, 0.01), "fov": 33.0},
-	"zipper": {"eye": Vector3(0.42, 0.37, 0.39), "at": Vector3(0.23, 0.05, 0.08), "fov": 25.0}
-}
-const CAMERA_BAG_VIEWS := {
-	"camera_body": {"eye": Vector3(0.02, 0.46, 0.56), "at": Vector3(0.025, 0.18, 0.015), "fov": 31.0},
-	"strap": {"eye": Vector3(-0.39, 0.43, 0.44), "at": Vector3(-0.17, 0.075, 0.12), "fov": 26.0},
-	"onions": {"eye": Vector3(0.30, 0.73, 0.41), "at": Vector3(0.07, 0.08, -0.05), "fov": 37.0}
-}
 var _package_id := "P01"
 var _pending_lining := false
 
@@ -37,6 +18,7 @@ var _focus_id := ""
 var _focus_tween: Tween
 var _overview: Transform3D
 var _overview_fov: float
+var _dragging := false
 
 @onready var _pivot: Node3D = $Pivot
 @onready var _package: Node3D = $Pivot/Package
@@ -62,6 +44,10 @@ func _ready() -> void:
 		$Camera3D.position = Vector3(0.03, 0.91, 0.89)
 		$Camera3D.look_at(Vector3(0, 0.14, 0), Vector3.UP)
 		$Camera3D.fov = 44
+	elif _package_id != "P01":
+		$Camera3D.position = Vector3(0.04, 0.86, 0.62) if _package_id == "P05" else Vector3(0.04, 0.56, 0.47)
+		$Camera3D.look_at(Vector3(0, 0.05, 0), Vector3.UP)
+		$Camera3D.fov = 43
 	_overview = $Camera3D.transform
 	_overview_fov = $Camera3D.fov
 	var environment := WorldEnvironment.new()
@@ -84,18 +70,12 @@ func set_item(package_id: String = "P01") -> void:
 func _swap_package() -> void:
 	_pivot.remove_child(_package)
 	_package.queue_free()
-	var scenes := {"P02": preload("res://scenes/objects/brick_package.tscn"),
-		"P03": preload("res://scenes/objects/suitcase.tscn"), "P04": preload("res://scenes/objects/camera_bag.tscn")}
-	_package = scenes[_package_id].instantiate()
+	_package = Packages.instantiate(_package_id)
 	_package.name = "Package"
 	_pivot.add_child(_package)
 
 func _views() -> Dictionary:
-	if _package_id == "P04":
-		return CAMERA_BAG_VIEWS
-	if _package_id == "P03":
-		return SUITCASE_VIEWS
-	return BRICK_VIEWS if _package_id == "P02" else DETAIL_VIEWS
+	return Packages.detail_views(_package_id)
 
 func set_lining_lifted(value: bool) -> void:
 	_pending_lining = value
@@ -109,15 +89,16 @@ func set_opened(value: bool) -> void:
 
 func set_input_enabled(value: bool) -> void:
 	input_enabled = value
+	if not value:
+		_dragging = false
 
 func get_focus_id() -> String:
 	return _focus_id
 
 func focus_detail(detail_id: String) -> void:
-	if not is_node_ready() or not _views().has(detail_id):
+	if not is_node_ready() or not can_focus_detail(detail_id):
 		return
-	if _package_id == "P03" and detail_id == "zipper" and not _pending_lining:
-		return
+	_dragging = false
 	if is_instance_valid(_turn):
 		_turn.kill()
 	var view: Dictionary = _views()[detail_id]
@@ -125,6 +106,9 @@ func focus_detail(detail_id: String) -> void:
 	_focus_id = detail_id
 	_transition_camera(destination, float(view.fov), true)
 	focus_changed.emit(_focus_id)
+
+func can_focus_detail(detail_id: String) -> bool:
+	return _views().has(detail_id) and (detail_id != "zipper" or _pending_lining)
 
 func reset_focus() -> void:
 	if not is_node_ready():
@@ -140,13 +124,13 @@ func _transition_camera(destination: Transform3D, field_of_view: float, straight
 		$Camera3D.transform = destination
 		$Camera3D.fov = field_of_view
 		if straighten_item:
-			_pivot.rotation.y = 0.0
+			_pivot.rotation = Vector3.ZERO
 		return
 	_focus_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	_focus_tween.tween_property($Camera3D, "transform", destination, 0.32)
 	_focus_tween.tween_property($Camera3D, "fov", field_of_view, 0.32)
 	if straighten_item:
-		_focus_tween.tween_property(_pivot, "rotation:y", 0.0, 0.32)
+		_focus_tween.tween_property(_pivot, "rotation", Vector3.ZERO, 0.32)
 
 func rotate_item(direction: float) -> void:
 	if not is_node_ready():
@@ -164,7 +148,23 @@ func rotate_item(direction: float) -> void:
 		_turn.tween_property(_pivot, "rotation:y", angle, 0.18)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not input_enabled or not (event is InputEventMouseButton):
+	if not input_enabled:
+		return
+	if event is InputEventMouseMotion and _dragging:
+		if not (event.button_mask & MOUSE_BUTTON_MASK_RIGHT):
+			_dragging = false
+			return
+		_pivot.rotation.y += event.relative.x * 0.009
+		_pivot.rotation.x = clampf(_pivot.rotation.x + event.relative.y * 0.006, -0.24, 0.32)
+		get_viewport().set_input_as_handled()
+		return
+	if not event is InputEventMouseButton:
+		return
+	if event.button_index == MOUSE_BUTTON_RIGHT:
+		_dragging = event.pressed and _focus_id.is_empty()
+		if _dragging and is_instance_valid(_turn):
+			_turn.kill()
+		get_viewport().set_input_as_handled()
 		return
 	if event.button_index != MOUSE_BUTTON_LEFT or not event.pressed:
 		return
@@ -176,6 +176,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not result.is_empty():
 		var collider: Object = result["collider"]
 		var detail_id := str(collider.get_meta("target_id", ""))
-		if _views().has(detail_id) or (_package_id == "P03" and detail_id == "lining"):
+		if can_focus_detail(detail_id) or (_package_id == "P03" and detail_id == "lining"):
 			detail_selected.emit(detail_id)
 			get_viewport().set_input_as_handled()

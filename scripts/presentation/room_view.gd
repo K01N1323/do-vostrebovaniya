@@ -4,9 +4,12 @@ extends Node3D
 signal target_clicked(target_id: String)
 signal hover_changed(target_id: String)
 signal visitor_arrived
+signal sound_requested(id: String)
 signal handover_finished
 signal visitor_departed
 
+const StationShell = preload("res://scripts/presentation/station_shell.gd")
+const Packages = preload("res://scripts/presentation/package_registry.gd")
 const G = preload("res://scripts/presentation/geometry.gd")
 const CRATE_PROBE = preload("res://assets/models/crate_probe.glb")
 const Rules = preload("res://scripts/core/state_reducer.gd")
@@ -18,6 +21,8 @@ const PACKAGE_POSITIONS := {
 }
 const VISITOR_WAIT := Vector3(0, 0, -0.94)
 const VISITOR_FAR := Vector3(-1.7, 0, -5.8)
+const BUS_WAIT := Vector3(-0.58, 0, -4.60)
+const NINA_ASIDE := Vector3(0.82, 0, -1.55)
 
 @export var input_enabled: bool = true
 var visitor_phase: String = "absent"
@@ -31,6 +36,12 @@ var _highlights: Dictionary = {}
 var _visitor: Node3D
 var _visitor_geometry: Node3D
 var _visitor_target: StaticBody3D
+var _waiting_serov: Node3D
+var _waiting_serov_target: StaticBody3D
+var _archived_card: Node3D
+var _serov_card: MeshInstance3D
+var _held_card: Node3D
+var _personal_card_target: StaticBody3D
 var _visitor_tween: Tween
 var _transfer_tween: Tween
 var _rotation_tween: Tween
@@ -47,22 +58,21 @@ var _paper_titles: Dictionary = {}
 @onready var _package: Node3D = $Package
 
 func _ready() -> void:
-	_build_room()
+	if not GameStore.content_errors.is_empty():
+		return
+	StationShell.build(self)
 	_build_shelf()
 	_build_desk()
 	_build_cage()
 	_build_hatch()
 	_build_nina()
 	_package_views["P01"] = _package
-	var brick := preload("res://scenes/objects/brick_package.tscn").instantiate()
-	add_child(brick)
-	_package_views["P02"] = brick
-	var suitcase := preload("res://scenes/objects/suitcase.tscn").instantiate()
-	add_child(suitcase)
-	_package_views["P03"] = suitcase
-	var camera_bag := preload("res://scenes/objects/camera_bag.tscn").instantiate()
-	add_child(camera_bag)
-	_package_views["P04"] = camera_bag
+	for id in Packages.SCENES:
+		if id == "P01":
+			continue
+		var view := Packages.instantiate(id)
+		add_child(view)
+		_package_views[id] = view
 	_build_lighting()
 	var pending := _snapshot.duplicate(true)
 	_snapshot.clear()
@@ -71,7 +81,7 @@ func _ready() -> void:
 	else:
 		_set_visitor_phase("absent")
 
-func apply_snapshot(snapshot: Dictionary) -> void:
+func apply_snapshot(snapshot: Dictionary, restored: bool = false) -> void:
 	if not is_node_ready():
 		_snapshot = snapshot.duplicate(true)
 		return
@@ -89,7 +99,7 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 	var restarted := had_previous and ((previous_started and not started) or (previous_status == "resolved" and status == "active" and not changed_case))
 	_snapshot = snapshot.duplicate(true)
 	_has_snapshot = true
-	if restarted or changed_case or not had_previous:
+	if restarted or changed_case or not had_previous or restored:
 		_cancel_animations()
 		set_hovered("")
 		_package = _package_views[package_state.id]
@@ -100,27 +110,47 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 	if not started:
 		_cancel_animations()
 		_set_visitor_phase("absent")
-	elif not had_previous:
-		_visitor.position = VISITOR_WAIT
-		_set_visitor_phase("gone" if status == "resolved" else "waiting")
+	elif not had_previous or restored:
+		var at_bus: bool = snapshot.case_id == "serov" and Rules.serov_waits_for_bus(snapshot)
+		_visitor.position = BUS_WAIT if at_bus else VISITOR_WAIT
+		_set_visitor_phase("at_bus" if at_bus else ("gone" if status == "resolved" else "waiting"))
 	elif (not previous_started and started) or changed_case:
 		_start_arrival()
-	if location == "issued" and had_previous and previous_location == "desk" and not restarted and not changed_case:
+	if location == "issued" and had_previous and previous_location == "desk" and not restarted and not changed_case and not restored:
 		_start_handover()
 	elif not transfer_active:
-		_package.visible = location != "issued"
+		_package.visible = location != "issued" and not (snapshot.case_id == "finale" and visitor_phase == "arriving")
 		if PACKAGE_POSITIONS.has(location):
 			_package.position = _package_position(package_state.id, location)
 		if restarted or changed_case or not had_previous or location != previous_location:
 			_package.rotation_degrees.y = 59.0 if location == "shelf" else (-45.0 if location == "personal" else 0.0)
 		_update_package_lid()
-		_set_package_picking(_package.visible)
-	if started and status == "resolved" and had_previous and previous_status != "resolved":
-		_start_departure()
+		_set_package_picking(_package.visible and (snapshot.case_id != "finale" or snapshot.card_location == "bag"))
+	_render_auxiliary_finds()
+	_sync_finale_props()
+	if started and status == "resolved" and had_previous and previous_status != "resolved" and not restored:
+		if _snapshot.case_id == "finale":
+			_set_visitor_phase("gone")
+		else:
+			_start_departure()
 	if not _package.visible and _hovered == package_state.id:
 		set_hovered("")
 
 func _package_position(package_id: String, location: String) -> Vector3:
+	if package_id == "P08":
+		if location == "shelf":
+			return Vector3(-2.14, 0.32, 1.46)
+		if location == "personal":
+			return Vector3(0.68, 0.57, -0.12)
+	if package_id == "P05":
+		if location == "shelf":
+			return Vector3(-1.14, 0.32, -0.20)
+		if location == "personal":
+			return Vector3(0.68, 0.25, -0.12)
+	if package_id == "P06" and location == "shelf":
+		return Vector3(-1.14, 1.16, -0.20)
+	if package_id == "P07" and location == "shelf":
+		return Vector3(-1.14, 2.06, -0.20)
 	if package_id == "P04":
 		if location == "shelf":
 			return Vector3(-2.14, 1.16, 1.46)
@@ -137,11 +167,16 @@ func _package_position(package_id: String, location: String) -> Vector3:
 
 func _render_inactive_packages() -> void:
 	var packages: Dictionary = Rules.all_packages(_snapshot)
+	var auxiliary: Dictionary = Rules.auxiliary_packages(_snapshot)
 	for id in _package_views:
 		var view: Node3D = _package_views[id]
-		if view == _package:
+		if view == _package or auxiliary.has(id):
 			continue
-		var item: Dictionary = packages[id]
+		var item: Dictionary = packages.get(id, {})
+		if item.is_empty():
+			view.hide()
+			view.get_node("Target_" + id).collision_layer = 0
+			continue
 		view.visible = item.location != "issued"
 		view.position = _package_position(id, item.location)
 		view.rotation_degrees.y = 59 if item.location == "shelf" else -45
@@ -152,6 +187,52 @@ func _render_inactive_packages() -> void:
 		view.set_highlighted(false)
 		var target: StaticBody3D = view.get_node("Target_" + id)
 		target.collision_layer = 0
+
+func _render_auxiliary_finds() -> void:
+	var auxiliary := Rules.auxiliary_packages(_snapshot)
+	for id in auxiliary:
+		var item: Dictionary = auxiliary[id]
+		var view: Node3D = _package_views[id]
+		var on_desk: bool = item.location == "desk"
+		view.show()
+		view.position = _package_position(id, item.location)
+		view.rotation_degrees.y = 0.0 if on_desk else 59.0
+		view.set_opened(on_desk and item.opened and _view_id == "desk")
+		if view.has_method("set_unlocked"):
+			view.set_unlocked(item.unlocked)
+			view.set_lining_lifted(item.lining_lifted)
+		view.set_highlighted(id == _hovered)
+		var target: StaticBody3D = view.get_node("Target_" + id)
+		target.collision_layer = 1 if _snapshot.started and not (transfer_active and on_desk) else 0
+
+func _sync_finale_props() -> void:
+	var at_bus: bool = _snapshot.started and _snapshot.completed_cases.has("serov")
+	_waiting_serov.visible = at_bus
+	_waiting_serov_target.collision_layer = 1 if at_bus else 0
+	if _snapshot.case_id == "finale" and visitor_phase == "waiting":
+		var nina_at_window: bool = _snapshot.card_location == "bag"
+		_visitor.position = VISITOR_WAIT if nina_at_window else NINA_ASIDE
+		_visitor_target.collision_layer = 1 if nina_at_window else 0
+	_package_views.P08.set_card_inside(_snapshot.card_location == "bag")
+	_archived_card.visible = _snapshot.card_location in ["archive", "archive_draft"]
+	_held_card.visible = _snapshot.card_location == "hand"
+	_personal_card_target.collision_layer = 1 if _held_card.visible else 0
+	_serov_card.visible = _snapshot.card_location == "serov"
+	_show_issued_coat()
+
+func _show_issued_coat() -> void:
+	if not is_serov_at_bus() or transfer_active:
+		return
+	var coat: Dictionary = Rules.all_packages(_snapshot).P05
+	if coat.location == "issued":
+		var view: Node3D = _package_views.P05
+		view.set_opened(false)
+		view.rotation_degrees.y = -16.0
+		view.position = BUS_WAIT + Vector3(0.40, 0, 0.10)
+		view.show()
+
+func is_serov_at_bus() -> bool:
+	return visitor_phase == "at_bus" or _waiting_serov.visible
 
 func set_input_enabled(value: bool) -> void:
 	input_enabled = value
@@ -164,6 +245,8 @@ func set_reduced_motion(value: bool) -> void:
 func set_view(view_id: String) -> void:
 	_view_id = view_id
 	_update_package_lid()
+	if _has_snapshot:
+		_render_auxiliary_finds()
 
 func _update_package_lid() -> void:
 	if not is_instance_valid(_package) or transfer_active:
@@ -198,6 +281,9 @@ func set_hovered(target_id: String) -> void:
 	_hovered = target_id
 	if is_instance_valid(_package):
 		_package.set_highlighted(target_id == _snapshot.get("package", {}).get("id", "P01") and _package.visible and not transfer_active)
+	if _snapshot.has("loose_finds"):
+		for id in Rules.auxiliary_packages(_snapshot):
+			_package_views[id].set_highlighted(target_id == id)
 	for key in _highlights:
 		var mesh: MeshInstance3D = _highlights[key]
 		mesh.visible = key == target_id
@@ -252,8 +338,10 @@ func _set_visitor_phase(value: String) -> void:
 	if is_instance_valid(_visitor):
 		_visitor.visible = value not in ["absent", "gone"]
 	if is_instance_valid(_visitor_target):
-		_visitor_target.collision_layer = 1 if value == "waiting" else 0
-	if value == "gone":
+		_visitor_target.collision_layer = 1 if value in ["waiting", "at_bus"] else 0
+	if value == "at_bus":
+		_show_issued_coat()
+	if value in ["gone", "at_bus"]:
 		visitor_departed.emit()
 
 func _start_arrival() -> void:
@@ -261,10 +349,14 @@ func _start_arrival() -> void:
 		_visitor_tween.kill()
 	_visitor.position = VISITOR_FAR
 	_set_visitor_phase("arriving")
+	sound_requested.emit("steps")
 	_visitor_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_visitor_tween.tween_property(_visitor, "position", VISITOR_WAIT, 0.03 if reduced_motion else 1.15)
 	_visitor_tween.tween_callback(func():
 		_set_visitor_phase("waiting")
+		if _snapshot.case_id == "finale":
+			_package.show()
+			_set_package_picking(true)
 		visitor_arrived.emit())
 
 func _start_departure() -> void:
@@ -275,8 +367,10 @@ func _start_departure() -> void:
 	_visitor_tween = create_tween()
 	_visitor_tween.tween_interval(2.1)
 	_visitor_tween.tween_callback(func(): _set_visitor_phase("leaving"))
-	_visitor_tween.tween_property(_visitor, "position", Vector3(2.0, 0, -5.8), 0.03 if reduced_motion else 1.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_visitor_tween.tween_callback(func(): _set_visitor_phase("gone"))
+	var waits: bool = _snapshot.case_id == "serov" and Rules.serov_waits_for_bus(_snapshot)
+	var destination := BUS_WAIT if waits else Vector3(2.0, 0, -5.8)
+	_visitor_tween.tween_property(_visitor, "position", destination, 0.03 if reduced_motion else 1.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_visitor_tween.tween_callback(func(): _set_visitor_phase("at_bus" if waits else "gone"))
 
 func _start_handover() -> void:
 	if transfer_active:
@@ -292,13 +386,17 @@ func _start_handover() -> void:
 	_transfer_tween = create_tween()
 	var speed := 0.06 if reduced_motion else 1.0
 	# A door is open from its first moving frame until it is completely closed.
-	_transfer_tween.tween_callback(func(): _inner_open = true)
+	_transfer_tween.tween_callback(func():
+		_inner_open = true
+		sound_requested.emit("latch"))
 	_transfer_tween.tween_property(_inner_door, "position:y", 0.83, 0.14 * speed)
 	_transfer_tween.tween_property(_package, "position", Vector3(0.72, 0.94, 0.23), 0.28 * speed)
 	_transfer_tween.tween_property(_package, "position", PACKAGE_POSITIONS["hatch"], 0.30 * speed)
 	_transfer_tween.tween_property(_inner_door, "position:y", 0.0, 0.16 * speed)
 	_transfer_tween.tween_callback(func(): _inner_open = false)
-	_transfer_tween.tween_callback(func(): _outer_open = true)
+	_transfer_tween.tween_callback(func():
+		_outer_open = true
+		sound_requested.emit("latch"))
 	_transfer_tween.tween_property(_outer_door, "position:y", 0.83, 0.16 * speed)
 	_transfer_tween.tween_property(_package, "position", Vector3(0.72, 0.94, -1.42), 0.25 * speed)
 	_transfer_tween.tween_callback(func(): _package.visible = false)
@@ -306,6 +404,7 @@ func _start_handover() -> void:
 	_transfer_tween.tween_callback(func():
 		_outer_open = false
 		transfer_active = false
+		_render_auxiliary_finds()
 		handover_finished.emit())
 
 func _close_hatch_now() -> void:
@@ -322,66 +421,6 @@ func _cancel_animations() -> void:
 			tween.kill()
 	transfer_active = false
 	_close_hatch_now()
-
-func _build_room() -> void:
-	var wall := G.worn_material(Color("99917f"), "plaster")
-	var lower := G.worn_material(Color("6d746b"), "tile")
-	var trim := G.worn_material(Color("464b43"), "metal", 0.86, 0.3)
-	var floor := G.worn_material(Color("57564b"), "tile")
-	G.box(self, Vector3(7.0, 0.12, 10.0), Vector3(0, -0.06, -2.0), floor)
-	var grout := G.material(Color("363a32"))
-	for z in range(21):
-		G.box(self, Vector3(6.95, 0.003, 0.009), Vector3(0, 0.002, -6.8 + z * 0.48), grout)
-	for x in range(15):
-		G.box(self, Vector3(0.009, 0.003, 9.85), Vector3(-3.45 + x * 0.48, 0.002, -1.86), grout)
-	G.box(self, Vector3(2.8, 0.009, 2.2), Vector3(-0.65, 0.009, 0.85), G.worn_material(Color("49483a"), "leather"))
-	G.box(self, Vector3(7.0, 3.3, 0.2), Vector3(0, 1.65, -6.8), wall)
-	for x in [-3.5, 2.4]:
-		G.box(self, Vector3(0.16, 3.3, 9.8), Vector3(x, 1.65, -2.0), wall)
-		G.box(self, Vector3(0.025, 1.12, 9.8), Vector3(x + (0.09 if x < 0 else -0.09), 0.56, -2.0), lower)
-		G.box(self, Vector3(0.045, 0.09, 9.8), Vector3(x + (0.11 if x < 0 else -0.11), 0.06, -2.0), trim)
-		G.box(self, Vector3(0.04, 0.045, 9.8), Vector3(x + (0.11 if x < 0 else -0.11), 1.15, -2.0), trim)
-		for height in [0.28, 0.56, 0.84]:
-			G.box(self, Vector3(0.005, 0.008, 9.7), Vector3(x + (0.108 if x < 0 else -0.108), height, -2.0), grout)
-	G.box(self, Vector3(7.0, 1.12, 0.025), Vector3(0, 0.56, -6.68), lower)
-	G.box(self, Vector3(7.0, 0.045, 0.04), Vector3(0, 1.16, -6.66), trim)
-	G.box(self, Vector3(7.0, 0.10, 0.05), Vector3(0, 0.06, -6.64), trim)
-	# A real ceiling, cornice and service conduits keep the hall enclosed.
-	G.box(self, Vector3(7.0, 0.14, 10.0), Vector3(0, 3.15, -2.0), G.worn_material(Color("888878"), "plaster"))
-	for x in [-3.37, 2.27]:
-		G.box(self, Vector3(0.12, 0.13, 9.8), Vector3(x, 3.01, -2.0), G.worn_material(Color("73776b"), "plaster"))
-	for z in [-5.7, -3.2, 0.1, 2.6]:
-		G.box(self, Vector3(5.8, 0.025, 0.035), Vector3(-0.5, 3.06, z), trim)
-	G.rod(self, Vector3(2.24, 2.91, -6.6), Vector3(2.24, 2.91, 2.5), 0.018, trim)
-	G.rod(self, Vector3(2.24, 2.91, -2.9), Vector3(2.24, 0.3, -2.9), 0.018, trim)
-	G.box(self, Vector3(0.11, 0.18, 0.16), Vector3(2.23, 1.65, -2.9), trim)
-	_build_station_door()
-	_build_hall_window()
-	_build_notices()
-	_build_bench()
-	_build_ceiling_fixture(Vector3(-0.6, 3.0, -3.4), true)
-	_build_ceiling_fixture(Vector3(0.7, 3.0, -5.9), false)
-	# Small irregular moisture stains belong to the low wall, away from the face.
-	var damp := G.worn_material(Color("565b50"), "rust")
-	_add_wall_stain(self, Vector3(-2.9, 0.18, -6.65), Vector2(0.75, 0.38), damp)
-	_add_wall_stain(self, Vector3(1.94, 0.17, -6.65), Vector2(0.54, 0.25), damp)
-	_build_clock()
-	G.label(self, "А В Т О В О К З А Л", Vector3(0.1, 2.76, -6.62), 27, Color("b0ac94"))
-
-func _build_clock() -> void:
-	var clock := Node3D.new()
-	clock.position = Vector3(-0.56, 2.26, -6.60)
-	add_child(clock)
-	var rim := G.cylinder(clock, 0.20, 0.04, Vector3.ZERO, G.worn_material(Color("555949"), "metal", 0.7, 0.4))
-	rim.rotation_degrees.x = 90
-	var dial := G.cylinder(clock, 0.176, 0.01, Vector3(0, 0, 0.025), G.worn_material(Color("b7b69b"), "paper"))
-	dial.rotation_degrees.x = 90
-	var ink := G.material(Color("2c3b30"))
-	G.rod(clock, Vector3(0, 0, 0.036), Vector3(-0.09, 0.04, 0.036), 0.007, ink)
-	G.rod(clock, Vector3(0, 0, 0.038), Vector3(0.05, 0.13, 0.038), 0.005, ink)
-	for i in range(12):
-		var angle := float(i) / 12.0 * TAU
-		G.sphere(clock, 0.006, Vector3(sin(angle) * 0.15, cos(angle) * 0.15, 0.037), ink)
 
 func _build_shelf() -> void:
 	var wood := G.worn_material(Color("665845"), "wood")
@@ -402,6 +441,14 @@ func _build_shelf() -> void:
 	for x in [-1.26, -0.72]:
 		G.rod(shelf, Vector3(x, 0.75, -0.28), Vector3(x, 1.08, 0.24), 0.018, G.worn_material(Color("555b4d"), "metal"))
 	G.label(shelf, "П04", Vector3(-0.99, 1.12, 0.35), 20, Color("c8b788"))
+	G.box(shelf, Vector3(0.69, 0.08, 0.66), Vector3(-0.99, 0.28, 0), wood)
+	G.label(shelf, "П08", Vector3(-0.99, 0.28, 0.35), 20, Color("c8b788"))
+	for slot in [[0.28, "П05"], [1.12, "П06"], [2.02, "П07"]]:
+		var height: float = slot[0]
+		G.box(shelf, Vector3(0.69, 0.08, 0.65), Vector3(0.99, height, 0), wood)
+		G.label(shelf, slot[1], Vector3(0.99, height, 0.35), 20, Color("c8b788"))
+	for z in [-0.29, 0.29]:
+		G.box(shelf, Vector3(0.046, 2.1, 0.046), Vector3(1.31, 1.05, z), wood)
 	var crate: Node3D = CRATE_PROBE.instantiate()
 	crate.name = "ImportedCrateProbe"
 	crate.position = Vector3(-0.46, 0.49, 0)
@@ -452,11 +499,40 @@ func _build_desk() -> void:
 	G.box(third_stand, Vector3(0.75, 0.07, 0.64), Vector3(0, 0.215, 0), dark)
 	for x in [-0.32, 0.32]:
 		G.box(third_stand, Vector3(0.05, 0.22, 0.58), Vector3(x, 0.11, 0), dark)
+	G.box(self, Vector3(0.73, 0.07, 0.58), Vector3(0.68, 0.215, -0.12), dark).rotation_degrees.y = -45
+	for x in [0.39, 0.97]:
+		G.box(self, Vector3(0.05, 0.22, 0.45), Vector3(x, 0.11, -0.12), dark)
+	G.box(self, Vector3(0.75, 0.048, 0.55), Vector3(0.68, 0.546, -0.12), dark).rotation_degrees.y = -45
+	for x in [0.39, 0.97]:
+		G.box(self, Vector3(0.043, 0.28, 0.045), Vector3(x, 0.395, -0.12), dark)
+	_personal_card_target = G.target(self, "personal_bag", Vector3(0.62, 0.17, 0.49), Vector3(0.68, 0.64, -0.12))
+	_personal_card_target.collision_layer = 0
+	_add_highlight(self, "personal_bag", Vector3(0.56, 0.004, 0.46), Vector3(0.68, 0.573, -0.12))
+	_held_card = Node3D.new()
+	_held_card.name = "CardInHand"
+	_held_card.position = Vector3(0.20, 1.045, 0.12)
+	add_child(_held_card)
+	G.box(_held_card, Vector3(0.15, 0.004, 0.10), Vector3.ZERO, G.worn_material(Color("c0a778"), "paper"))
+	var held_number := G.label(_held_card, "№ 314", Vector3(0, 0.004, 0), 22, Color("534736"))
+	held_number.rotation_degrees.x = -90
+	held_number.pixel_size = 0.0014
+	_held_card.hide()
 	_build_paper("identity", Vector3(-0.69, 0.952, 0.28), -7, "УДОСТОВЕРЕНИЕ", Color("b8b097"))
 	_build_paper("claim", Vector3(-0.20, 0.953, 0.32), 6, "ЗАЯВЛЕНИЕ № 01", Color("b4ae94"))
+	var badge := Node3D.new()
+	badge.name = "ClerkIdentity"
+	badge.position = Vector3(0.32, 0.954, 0.28)
+	badge.rotation_degrees.y = -10
+	add_child(badge)
+	G.box(badge, Vector3(0.17, 0.006, 0.11), Vector3.ZERO, G.worn_material(Color("b8b097"), "paper"))
+	var badge_name := G.label(badge, "П. ФОМИН", Vector3(0, 0.005, 0), 15, Color("414238"))
+	badge_name.rotation_degrees.x = -90
+	badge_name.pixel_size = 0.0015
+	G.target(badge, "clerk_identity", Vector3(0.18, 0.03, 0.12), Vector3(0, 0.01, 0))
+	_add_highlight(badge, "clerk_identity", Vector3(0.18, 0.003, 0.12), Vector3(0, -0.001, 0))
 	var archive := Node3D.new()
 	archive.name = "ArchiveFolder"
-	archive.position = Vector3(-0.99, 0.95, -0.13)
+	archive.position = Vector3(-0.83, 0.95, -0.24)
 	archive.rotation_degrees.y = -5
 	add_child(archive)
 	G.box(archive, Vector3(0.28, 0.08, 0.43), Vector3(0, 0.04, 0), G.worn_material(Color("6c6549"), "paper"))
@@ -466,6 +542,17 @@ func _build_desk() -> void:
 	label.pixel_size = 0.002
 	G.target(archive, "archive", Vector3(0.32, 0.14, 0.46), Vector3(0, 0.07, 0))
 	_add_highlight(archive, "archive", Vector3(0.32, 0.004, 0.47), Vector3.ZERO)
+	_archived_card = Node3D.new()
+	_archived_card.name = "ArchivedCard"
+	_archived_card.position = Vector3(-0.028, 0.105, 0.067)
+	_archived_card.rotation.y = 0.22
+	archive.add_child(_archived_card)
+	G.box(_archived_card, Vector3(0.19, 0.006, 0.127), Vector3(0.025, 0.003, 0.038), G.worn_material(Color("bcb29a"), "paper"))
+	G.box(_archived_card, Vector3(0.124, 0.006, 0.088), Vector3.ZERO, G.worn_material(Color("c0a778"), "paper"))
+	var number := G.label(_archived_card, "№ 314", Vector3(0, 0.006, 0), 22, Color("534736"))
+	number.rotation_degrees.x = -90
+	number.pixel_size = 0.0014
+	_archived_card.hide()
 	_build_lamp()
 	_build_clerk_details()
 
@@ -618,6 +705,17 @@ func _build_nina() -> void:
 		G.sphere(nina, 0.055, Vector3(side * 0.17, 1.0, 0.42), skin, Vector3(0.8, 0.45, 1.0))
 	_visitor_target = G.target(_visitor, "nina", Vector3(0.75, 1.2, 0.55), Vector3(0, 1.11, 0.05))
 	_load_nina_image_if_available()
+	_waiting_serov = Node3D.new()
+	_waiting_serov.name = "SerovAtBus"
+	_waiting_serov.position = BUS_WAIT
+	add_child(_waiting_serov)
+	_waiting_serov.add_child(_make_portrait("WaitingPortrait", GameStore.get_case_content("serov").presentation.portrait))
+	_waiting_serov_target = G.target(_waiting_serov, "serov", Vector3(0.75, 1.2, 0.55), Vector3(0, 1.11, 0.05))
+	_waiting_serov_target.collision_layer = 0
+	_serov_card = G.box(_waiting_serov, Vector3(0.087, 0.062, 0.004), Vector3(0.14, 1.145, 0.069), G.worn_material(Color("bea986"), "paper"), "CardWithSerov")
+	_serov_card.rotation.z = -0.12
+	_serov_card.hide()
+	_waiting_serov.hide()
 	_set_visitor_phase("absent")
 
 func _load_nina_image_if_available() -> void:
@@ -648,27 +746,19 @@ func _load_nina_image_if_available() -> void:
 func _configure_visitor(case_id: String) -> void:
 	var presentation: Dictionary = GameStore.get_case_content(case_id).presentation
 	if _paper_titles.has("claim"):
-		_paper_titles.claim.text = ("ЗАЯВЛЕНИЯ № " if case_id == "melnikovs" else "ЗАЯВЛЕНИЕ № ") + presentation.number
+		_paper_titles.claim.text = "СЛУЖЕБНЫЕ БУМАГИ" if case_id == "finale" else ("ЗАЯВЛЕНИЯ № " if case_id == "melnikovs" else "ЗАЯВЛЕНИЕ № ") + presentation.number
 	if _paper_titles.has("identity"):
-		_paper_titles.identity.text = "ДОКУМЕНТЫ · 2" if case_id == "melnikovs" else ("ДОКУМЕНТ" if case_id in ["fedor", "gleb"] else "УДОСТОВЕРЕНИЕ")
-	var portrait_name := case_id.capitalize() + "Portrait"
-	for name_value in ["NinaPortrait", "FedorPortrait", "MelnikovsPortrait", "GlebPortrait"]:
-		var existing := _visitor.get_node_or_null(name_value) as Sprite3D
-		if is_instance_valid(existing):
-			existing.visible = name_value == portrait_name
+		match case_id:
+			"finale": _paper_titles.identity.text = "ЖУРНАЛ СМЕНЫ"
+			"melnikovs": _paper_titles.identity.text = "ДОКУМЕНТЫ · 2"
+			_: _paper_titles.identity.text = "ДОКУМЕНТ" if presentation.get("identity_layout") == "sheet" else "УДОСТОВЕРЕНИЕ"
+	var portrait_name := ("nina" if case_id == "finale" else case_id).capitalize() + "Portrait"
+	for child in _visitor.get_children():
+		if child is Sprite3D:
+			child.visible = str(child.name) == portrait_name
 	var portrait := _visitor.get_node_or_null(portrait_name) as Sprite3D
 	if not is_instance_valid(portrait):
-		portrait = Sprite3D.new()
-		portrait.name = portrait_name
-		portrait.texture = load(presentation.portrait)
-		portrait.pixel_size = 1.84 / float(portrait.texture.get_height())
-		portrait.position = Vector3(0, 0.92, 0.06)
-		portrait.set_script(preload("res://scripts/presentation/visitor_portrait.gd"))
-		portrait.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		portrait.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-		portrait.alpha_scissor_threshold = 0.05
-		portrait.shaded = false
-		portrait.modulate = Color(0.66, 0.84, 0.88)
+		portrait = _make_portrait(portrait_name, presentation.portrait)
 		_visitor.add_child(portrait)
 	portrait.visible = true
 	var anchor := Vector3(-0.11 if case_id == "melnikovs" else 0.0, 0.92, 0.06)
@@ -676,6 +766,20 @@ func _configure_visitor(case_id: String) -> void:
 	portrait.position = anchor
 	_visitor_geometry.visible = false
 	_visitor_target.set_meta("target_id", case_id)
+
+func _make_portrait(portrait_name: String, texture_path: String) -> Sprite3D:
+	var portrait := Sprite3D.new()
+	portrait.name = portrait_name
+	portrait.texture = load(texture_path)
+	portrait.pixel_size = 1.84 / float(portrait.texture.get_height())
+	portrait.position = Vector3(0, 0.92, 0.06)
+	portrait.set_script(preload("res://scripts/presentation/visitor_portrait.gd"))
+	portrait.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	portrait.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	portrait.alpha_scissor_threshold = 0.05
+	portrait.shaded = false
+	portrait.modulate = Color(0.66, 0.84, 0.88)
+	return portrait
 
 func _build_lighting() -> void:
 	var world := WorldEnvironment.new()
@@ -727,149 +831,6 @@ func _add_highlight(parent: Node3D, target_id: String, size: Vector3, position: 
 	var mesh := G.box(parent, size, position, material)
 	mesh.visible = false
 	_highlights[target_id] = mesh
-
-func _build_station_door() -> void:
-	var frame := G.worn_material(Color("69624f"), "wood")
-	var paint := G.worn_material(Color("6d7165"), "paint")
-	var metal := G.worn_material(Color("73746a"), "metal", 0.82, 0.4)
-	G.box(self, Vector3(1.08, 2.28, 0.03), Vector3(-1.7, 1.14, -6.65), G.material(Color("252c27")))
-	for x in [-2.29, -1.11]:
-		G.box(self, Vector3(0.11, 2.42, 0.17), Vector3(x, 1.21, -6.59), frame)
-	G.box(self, Vector3(1.29, 0.12, 0.17), Vector3(-1.7, 2.39, -6.59), frame)
-	G.box(self, Vector3(1.13, 0.045, 0.32), Vector3(-1.7, 0.027, -6.48), metal)
-	var wing := Node3D.new()
-	wing.name = "HalfOpenStationDoor"
-	wing.position = Vector3(-2.23, 0, -6.57)
-	wing.rotation_degrees.y = -61
-	add_child(wing)
-	G.box(wing, Vector3(1.03, 2.23, 0.075), Vector3(0.515, 1.15, 0), paint)
-	G.box(wing, Vector3(0.81, 0.87, 0.025), Vector3(0.515, 1.59, 0.05), frame)
-	G.box(wing, Vector3(0.70, 0.76, 0.015), Vector3(0.515, 1.59, 0.069), G.worn_material(Color("59645d"), "tile"))
-	G.box(wing, Vector3(0.91, 0.27, 0.02), Vector3(0.515, 0.24, 0.049), metal)
-	G.box(wing, Vector3(0.07, 0.17, 0.018), Vector3(0.88, 1.08, 0.055), metal)
-	G.rod(wing, Vector3(0.88, 1.11, 0.09), Vector3(0.77, 1.11, 0.09), 0.014, metal)
-	G.label(self, "ПЛАТФОРМЫ  1—4", Vector3(-1.7, 2.60, -6.55), 23, Color("aca995"))
-	# A second, shut employee door gives the secure side a believable entrance.
-	var employee := Node3D.new()
-	employee.position = Vector3(-3.39, 0, 1.65)
-	employee.rotation_degrees.y = 90
-	add_child(employee)
-	G.box(employee, Vector3(0.91, 2.16, 0.055), Vector3(0, 1.08, 0), G.worn_material(Color("555447"), "wood"))
-	for x in [-0.50, 0.50]:
-		G.box(employee, Vector3(0.09, 2.30, 0.11), Vector3(x, 1.15, 0.02), frame)
-	G.box(employee, Vector3(1.09, 0.10, 0.11), Vector3(0, 2.25, 0.02), frame)
-	G.box(employee, Vector3(0.16, 0.15, 0.025), Vector3(0.32, 1.04, 0.045), metal)
-	G.rod(employee, Vector3(0.34, 1.07, 0.075), Vector3(0.22, 1.07, 0.075), 0.014, metal)
-	G.label(employee, "СЛУЖЕБНОЕ", Vector3(0, 1.72, 0.042), 17, Color("c0b59a"))
-
-func _build_hall_window() -> void:
-	var window := Node3D.new()
-	window.name = "StationWindowAndRadiator"
-	window.position = Vector3(2.29, 0, -4.3)
-	window.rotation_degrees.y = -90
-	add_child(window)
-	var wood := G.worn_material(Color("777669"), "wood")
-	var glass := G.worn_material(Color("657174"), "tile", 0.57)
-	G.box(window, Vector3(1.65, 1.45, 0.07), Vector3(0, 1.96, 0), G.material(Color("363f3c")))
-	for x in [-0.81, 0.0, 0.81]:
-		G.box(window, Vector3(0.065, 1.45, 0.10), Vector3(x, 1.96, 0.035), wood)
-	for x in [-0.40, 0.40]:
-		G.box(window, Vector3(0.72, 1.28, 0.025), Vector3(x, 1.96, 0.025), glass)
-	for y in [1.26, 2.66]:
-		G.box(window, Vector3(1.72, 0.07, 0.13), Vector3(0, y, 0.04), wood)
-	G.box(window, Vector3(1.88, 0.065, 0.31), Vector3(0, 1.23, 0.13), G.worn_material(Color("8d8d7c"), "plaster"))
-	var radiator := G.worn_material(Color("7e8277"), "metal", 0.9, 0.25)
-	for i in range(11):
-		var x := -0.66 + i * 0.132
-		G.rod(window, Vector3(x, 0.31, 0.11), Vector3(x, 0.91, 0.11), 0.041, radiator)
-	for y in [0.38, 0.84]:
-		G.rod(window, Vector3(-0.77, y, 0.11), Vector3(0.78, y, 0.11), 0.025, radiator)
-	G.rod(window, Vector3(0.83, 0.35, 0.11), Vector3(0.83, 0.13, 0.11), 0.018, radiator)
-	G.cylinder(window, 0.038, 0.035, Vector3(0.83, 0.33, 0.11), G.material(Color("4d5147")))
-
-func _build_notices() -> void:
-	var board := Node3D.new()
-	board.name = "DustyStationNoticeBoard"
-	board.position = Vector3(0.96, 1.73, -6.64)
-	add_child(board)
-	G.box(board, Vector3(1.63, 1.34, 0.07), Vector3.ZERO, G.worn_material(Color("4b493b"), "wood"))
-	G.box(board, Vector3(1.49, 1.20, 0.02), Vector3(0, 0, 0.046), G.worn_material(Color("706955"), "cloth"))
-	_wall_notice(board, Vector3(-0.32, 0.12, 0.065), Vector2(0.63, 0.88), "РАСПИСАНИЕ", "06:20   ПРИГОРОД\n08:10   СЕВЕРНЫЙ\n12:40   РЕЧНОЙ\n18:15   ПРИГОРОД\n22:40   ПОСЛЕДНИЙ", -2.0)
-	_wall_notice(board, Vector3(0.40, 0.25, 0.068), Vector2(0.53, 0.55), "ОБЪЯВЛЕНИЕ", "БИЛЕТЫ\nСОХРАНЯТЬ\nДО КОНЦА ПОЕЗДКИ", 2.5)
-	_wall_notice(board, Vector3(0.37, -0.36, 0.071), Vector2(0.48, 0.31), "ЗАБЫТЫЕ ВЕЩИ", "СПРАВА ОТ КАССЫ", -4.0)
-	# Older notices leave pale rectangles and torn paper below the board.
-	var old_paste := G.worn_material(Color("aaa08a"), "paper")
-	G.box(self, Vector3(0.29, 0.48, 0.006), Vector3(-0.52, 1.53, -6.686), old_paste)
-	G.box(self, Vector3(0.23, 0.09, 0.008), Vector3(-0.49, 1.18, -6.679), old_paste)
-	var phone := Node3D.new()
-	phone.position = Vector3(2.29, 1.73, -2.6)
-	phone.rotation_degrees.y = -90
-	add_child(phone)
-	_wall_notice(phone, Vector3.ZERO, Vector2(0.54, 0.68), "СПРАВОЧНАЯ", "ПРИ УТЕРЕ БАГАЖА\nОБРАТИТЕСЬ К\nСМОТРИТЕЛЮ\n\nЧАСЫ РАБОТЫ\n08:00 — 23:00", -1.0)
-
-func _wall_notice(parent: Node3D, position: Vector3, size: Vector2, title: String, text: String, angle: float) -> void:
-	var notice := Node3D.new()
-	notice.position = position
-	notice.rotation_degrees.z = angle
-	parent.add_child(notice)
-	G.box(notice, Vector3(size.x, size.y, 0.007), Vector3.ZERO, G.worn_material(Color("c6baa0"), "paper"))
-	var header := G.label(notice, title, Vector3(0, size.y * 0.35, 0.007), 19, Color("4b5144"))
-	header.pixel_size = 0.00175
-	var body := G.label(notice, text, Vector3(0, -size.y * 0.05, 0.008), 14, Color("555a4b"))
-	body.pixel_size = 0.00155
-	var nail := G.material(Color("777466"))
-	G.sphere(notice, 0.006, Vector3(-size.x * 0.40, size.y * 0.42, 0.01), nail)
-	G.sphere(notice, 0.006, Vector3(size.x * 0.40, size.y * 0.42, 0.01), nail)
-
-func _build_bench() -> void:
-	var bench := Node3D.new()
-	bench.name = "WaitingHallBench"
-	bench.position = Vector3(0.87, 0, -5.42)
-	add_child(bench)
-	var wood := G.worn_material(Color("6e6045"), "wood")
-	var steel := G.worn_material(Color("424a40"), "metal", 0.87, 0.45)
-	for x in [-0.61, 0.61]:
-		G.rod(bench, Vector3(x, 0.04, 0.16), Vector3(x, 0.43, 0.11), 0.022, steel)
-		G.rod(bench, Vector3(x, 0.04, -0.18), Vector3(x, 0.96, -0.25), 0.022, steel)
-		G.rod(bench, Vector3(x, 0.39, -0.20), Vector3(x, 0.39, 0.20), 0.023, steel)
-	for z in [-0.15, 0.0, 0.15]:
-		G.box(bench, Vector3(1.63, 0.035, 0.12), Vector3(0, 0.45, z), wood)
-	for y in [0.64, 0.79, 0.94]:
-		G.box(bench, Vector3(1.63, 0.12, 0.035), Vector3(0, y, -0.25), wood)
-	G.box(bench, Vector3(0.24, 0.015, 0.17), Vector3(0.45, 0.48, 0.02), G.worn_material(Color("b3aa92"), "paper"))
-
-func _build_ceiling_fixture(position: Vector3, working: bool) -> void:
-	var fixture := Node3D.new()
-	fixture.name = "FluorescentFixture"
-	fixture.position = position
-	add_child(fixture)
-	var enamel := G.worn_material(Color("83877b"), "metal", 0.8, 0.3)
-	G.box(fixture, Vector3(1.38, 0.085, 0.29), Vector3.ZERO, enamel)
-	G.box(fixture, Vector3(1.24, 0.025, 0.22), Vector3(0, -0.054, 0), G.material(Color("4c554b")))
-	var tube := G.material(Color("abb4a2") if working else Color("72786c"))
-	if working:
-		tube.emission_enabled = true
-		tube.emission = Color("b1c0ae")
-		tube.emission_energy_multiplier = 0.35
-	for z in [-0.065, 0.065]:
-		var light_mesh := G.cylinder(fixture, 0.018, 1.13, Vector3(0, -0.077, z), tube)
-		light_mesh.rotation_degrees.z = 90
-		for x in [-0.58, 0.58]:
-			G.box(fixture, Vector3(0.045, 0.065, 0.05), Vector3(x, -0.059, z), enamel)
-
-func _add_wall_stain(parent: Node3D, position: Vector3, size: Vector2, material: Material) -> void:
-	var builder := SurfaceTool.new()
-	builder.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var points: Array[Vector3] = [Vector3(-0.5, -0.5, 0), Vector3(0.5, -0.5, 0), Vector3(0.48, -0.09, 0), Vector3(0.34, -0.04, 0), Vector3(0.25, 0.33, 0), Vector3(0.09, 0.12, 0), Vector3(-0.11, 0.50, 0), Vector3(-0.23, 0.18, 0), Vector3(-0.47, 0.22, 0)]
-	for i in range(1, points.size() - 1):
-		for point in [points[0], points[i], points[i + 1]]:
-			builder.add_vertex(Vector3(point.x * size.x, point.y * size.y, 0))
-	builder.generate_normals()
-	var mesh := MeshInstance3D.new()
-	mesh.mesh = builder.commit()
-	mesh.material_override = material
-	mesh.position = position
-	parent.add_child(mesh)
 
 func _build_clerk_details() -> void:
 	var enamel := G.worn_material(Color("b0aa91"), "metal", 0.75, 0.12)
