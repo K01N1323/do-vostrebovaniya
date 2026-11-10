@@ -42,6 +42,9 @@ var _inspection_zone := -1
 var _inspection_caption: Label
 var _inspection_overview: Button
 var _inspection_turns: Array[Button] = []
+var _zoom_out: Button
+var _zoom_in: Button
+var _zoom_caption: Label
 var _start_screen: Control
 var _action_panel: PanelContainer
 var _actions_button: Button
@@ -534,6 +537,7 @@ func _show_inspection(find_id: String = "") -> void:
 	_inspection.reduced_motion = _reduced
 	_inspection.detail_selected.connect(_preview_detail)
 	_inspection.focus_changed.connect(_refresh_inspection_focus)
+	_inspection.zoom_changed.connect(_refresh_inspection_zoom)
 	_inspection_caption = _label(left,"П" + presentation.number + " · Общий вид",14,MUTED)
 	_inspection_caption.name = "InspectionCaption"
 	var turn := HBoxContainer.new()
@@ -547,6 +551,19 @@ func _show_inspection(find_id: String = "") -> void:
 	for button in _inspection_turns + [_inspection_overview]:
 		button.add_theme_font_size_override("font_size",16)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var zoom := HBoxContainer.new()
+	zoom.alignment = BoxContainer.ALIGNMENT_CENTER
+	left.add_child(zoom)
+	_zoom_out = _button(zoom, "−", func(): _inspection.change_zoom(-1))
+	_zoom_out.tooltip_text = "Отдалить · колесо вниз"
+	_zoom_caption = _label(zoom, "100 %", 15, MUTED)
+	_zoom_caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_zoom_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_zoom_caption.custom_minimum_size.x = 64
+	_zoom_in = _button(zoom, "+", func(): _inspection.change_zoom(1))
+	_zoom_in.tooltip_text = "Приблизить · колесо вверх"
+	for button in [_zoom_out, _zoom_in]:
+		button.custom_minimum_size = Vector2(38, 29)
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(right)
@@ -575,7 +592,6 @@ func _show_inspection(find_id: String = "") -> void:
 	_button(modal_body,"Закончить осмотр · Esc",_close_modal)
 	if not find_id.is_empty():
 		_button(modal_body,"Вернуть находку на полку",func(): _move_find(find_id, "shelf"))
-	_remember_inspection("")
 
 func _preview_detail(id: String) -> void:
 	if id == "lining":
@@ -655,12 +671,24 @@ func _lift_lining() -> void:
 
 func _remember_inspection(detail_id: String) -> void:
 	var package_id: String = snapshot.package.id if _inspection_find_id.is_empty() else _inspection_find_id
-	GameStore.set_resume_view({"kind":"inspection", "id":package_id, "detail":detail_id})
+	var view := {"kind":"inspection", "id":package_id, "detail":detail_id}
+	var zoom_step: int = _inspection.get_zoom_step()
+	if zoom_step > 0:
+		view.zoom_step = zoom_step
+	GameStore.set_resume_view(view)
+
+func _refresh_inspection_zoom() -> void:
+	var step: int = _inspection.get_zoom_step()
+	_zoom_caption.text = "%d %%" % roundi(_inspection.zoom_ratio() * 100.0)
+	_zoom_out.disabled = step == 0
+	_zoom_in.disabled = step == _inspection.MAX_ZOOM_STEP
+	_inspection_overview.disabled = step == 0 and _inspection.get_focus_id().is_empty()
+	_remember_inspection(_inspection.get_focus_id())
 
 func _refresh_inspection_focus(id: String) -> void:
 	if _modal_kind != "inspection":
 		return
-	_remember_inspection(id)
+	_refresh_inspection_zoom()
 	var content := _inspection_content()
 	var overview := id.is_empty()
 	var item := Rules.auxiliary_item(snapshot, _inspection_find_id)
@@ -668,13 +696,12 @@ func _refresh_inspection_focus(id: String) -> void:
 	var recorded := id in observed
 	if overview:
 		_inspection_caption.text = "П" + content.presentation.number + " · Общий вид"
-		_observation_text.text = "Удерживайте ПКМ, чтобы повернуть вещь. Щёлкните по тому, что заметили, или выберите следующий ракурс."
+		_observation_text.text = "Зажмите ЛКМ и двигайте мышь, чтобы повернуть вещь. Колесо меняет масштаб. Короткий клик приближает деталь."
 	else:
 		_inspection_zone = content.details.keys().find(id)
 		_inspection_caption.text = "Крупный план" + (" · " + content.details[id].title if recorded else "")
-		_observation_text.text = content.details[id].text if recorded else "Рассмотрите деталь. Отметьте её, чтобы записать наблюдение."
+		_observation_text.text = content.details[id].text if recorded else "Колесо приближает деталь. Отметьте её, чтобы записать наблюдение."
 	_record_observation.visible = not overview and not recorded
-	_inspection_overview.disabled = overview
 	for button in _inspection_turns:
 		button.disabled = not overview
 
@@ -1041,8 +1068,10 @@ func _restore_panel(view: Dictionary) -> void:
 		"inspection":
 			_show_inspection("" if id == snapshot.package.id else id)
 			var detail: String = view.get("detail", "")
-			if not detail.is_empty() and is_instance_valid(_inspection):
-				_inspection.focus_detail(detail)
+			if is_instance_valid(_inspection):
+				if not detail.is_empty():
+					_inspection.focus_detail(detail)
+				_inspection.set_zoom_step(int(view.get("zoom_step", 0)))
 		"archive_draft":
 			_show_archive_draft()
 		"ending":

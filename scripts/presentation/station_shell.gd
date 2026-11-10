@@ -4,10 +4,10 @@ extends RefCounted
 const G = preload("res://scripts/presentation/geometry.gd")
 
 static func build(room: Node3D) -> void:
-	var wall := G.worn_material(Color("99917f"), "plaster")
-	var lower := G.worn_material(Color("6d746b"), "tile")
-	var trim := G.worn_material(Color("464b43"), "metal", 0.86, 0.3)
-	var floor := G.worn_material(Color("57564b"), "tile")
+	var wall := G.worn_material(Color("7c8781"), "plaster")
+	var lower := G.worn_material(Color("516865"), "tile")
+	var trim := G.worn_material(Color("354741"), "metal", 0.86, 0.3)
+	var floor := G.worn_material(Color("505653"), "tile")
 	G.box(room, Vector3(7.0, 0.12, 10.0), Vector3(0, -0.06, -2.0), floor)
 	var grout := G.material(Color("363a32"))
 	for z in range(21):
@@ -83,7 +83,14 @@ static func _build_station_door(room: Node3D) -> void:
 	G.box(wing, Vector3(0.91, 0.27, 0.02), Vector3(0.515, 0.24, 0.049), metal)
 	G.box(wing, Vector3(0.07, 0.17, 0.018), Vector3(0.88, 1.08, 0.055), metal)
 	G.rod(wing, Vector3(0.88, 1.11, 0.09), Vector3(0.77, 1.11, 0.09), 0.014, metal)
-	G.label(room, "ПЛАТФОРМЫ  1—4", Vector3(-1.7, 2.60, -6.55), 23, Color("aca995"))
+	var glass := G.material(Color("536e65"))
+	glass.emission_enabled = true
+	glass.emission = Color("42695f")
+	glass.emission_energy_multiplier = 0.52
+	G.box(room, Vector3(1.34, 0.24, 0.045), Vector3(-1.7, 2.57, -6.59), metal, "PlatformLightbox")
+	G.box(room, Vector3(1.27, 0.17, 0.015), Vector3(-1.7, 2.57, -6.56), glass)
+	G.label(room, "ПЛАТФОРМЫ  1—4", Vector3(-1.7, 2.57, -6.547), 22, Color("d4ded2"))
+	G.box(room, Vector3(0.065, 1.89, 0.012), Vector3(-1.18, 1.06, -6.625), glass)
 	# A second, shut employee door gives the secure side a believable entrance.
 	var employee := Node3D.new()
 	employee.position = Vector3(-3.39, 0, 1.65)
@@ -104,7 +111,7 @@ static func _build_hall_window(room: Node3D) -> void:
 	window.rotation_degrees.y = -90
 	room.add_child(window)
 	var wood := G.worn_material(Color("777669"), "wood")
-	var glass := G.worn_material(Color("657174"), "tile", 0.57)
+	var glass := G.worn_material(Color("586f73"), "tile", 0.57)
 	G.box(window, Vector3(1.65, 1.45, 0.07), Vector3(0, 1.96, 0), G.material(Color("363f3c")))
 	for x in [-0.81, 0.0, 0.81]:
 		G.box(window, Vector3(0.065, 1.45, 0.10), Vector3(x, 1.96, 0.035), wood)
@@ -184,8 +191,8 @@ static func _build_ceiling_fixture(room: Node3D, position: Vector3, working: boo
 	var tube := G.material(Color("abb4a2") if working else Color("72786c"))
 	if working:
 		tube.emission_enabled = true
-		tube.emission = Color("b1c0ae")
-		tube.emission_energy_multiplier = 0.35
+		tube.emission = Color("95d2c0")
+		tube.emission_energy_multiplier = 0.54
 	for z in [-0.065, 0.065]:
 		var light_mesh := G.cylinder(fixture, 0.018, 1.13, Vector3(0, -0.077, z), tube)
 		light_mesh.rotation_degrees.z = 90

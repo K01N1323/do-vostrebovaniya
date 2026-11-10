@@ -118,25 +118,32 @@ func _play_case(decision: String) -> bool:
 	await _settle()
 	var pivot := stage.get_node("Pivot") as Node3D
 	var point := container.get_global_rect().get_center()
-	var motion := InputEventMouseMotion.new()
-	motion.position = point
-	motion.global_position = point
-	motion.relative = Vector2(72, 24)
-	motion.button_mask = MOUSE_BUTTON_MASK_RIGHT
-	root.push_input(motion, true)
-	for pressed in [true, false]:
-		var drag := InputEventMouseButton.new()
-		drag.button_index = MOUSE_BUTTON_RIGHT
-		drag.button_mask = MOUSE_BUTTON_MASK_RIGHT if pressed else 0
-		drag.pressed = pressed
-		drag.position = point
-		drag.global_position = point
-		root.push_input(drag, true)
-		if pressed:
-			root.push_input(motion, true)
-		await process_frame
-	_expect(not is_zero_approx(pivot.rotation.y), "right drag rotates the item through the inspection viewport")
-	pivot.rotation = Vector3.ZERO
+	for drag_button in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]:
+		var mask := MOUSE_BUTTON_MASK_LEFT if drag_button == MOUSE_BUTTON_LEFT else MOUSE_BUTTON_MASK_RIGHT
+		for pressed in [true, false]:
+			var drag := InputEventMouseButton.new()
+			drag.button_index = drag_button
+			drag.button_mask = mask if pressed else 0
+			drag.pressed = pressed
+			drag.position = point
+			drag.global_position = point
+			root.push_input(drag, true)
+			if pressed:
+				var motion := InputEventMouseMotion.new()
+				motion.position = point + Vector2(72, 24)
+				motion.global_position = motion.position
+				motion.relative = Vector2(72, 24)
+				motion.button_mask = mask
+				root.push_input(motion, true)
+			await process_frame
+		_expect(not is_zero_approx(pivot.rotation.y) and stage.get_focus_id().is_empty(), "held mouse rotates without selecting a clue")
+		pivot.rotation = Vector3.ZERO
+		await physics_frame
+	var unzoomed := detail_camera.fov
+	await _wheel_at(point, MOUSE_BUTTON_WHEEL_UP)
+	_expect(stage.get_zoom_step() == 1 and detail_camera.fov < unzoomed, "wheel magnifies the entire item")
+	await _click_caption("−")
+	_expect(stage.get_zoom_step() == 0 and is_equal_approx(detail_camera.fov, unzoomed), "zoom-out button restores the default scale")
 	await physics_frame
 	var local_point := detail_camera.unproject_position(detail.global_position)
 	var root_point := container.get_global_transform_with_canvas() * local_point
@@ -145,12 +152,14 @@ func _play_case(decision: String) -> bool:
 		await _capture(decision + "-inspection-failed")
 		return false
 	_expect(_find_button(ui, "Голубая заплата") == null, "the clue label is unavailable before recording")
+	await _click_caption("+")
+	_expect(stage.get_zoom_step() == 1 and stage.get_focus_id() == "napkin", "zoom also works in a close-up")
 	await _click_caption("Отметить наблюдение")
 	_expect("napkin" in store.get_snapshot().inspected_details, "recording the focused patch stores its evidence")
 	await _capture(decision + "-close-up")
 	await _click_caption("Вся переноска")
 	await _settle()
-	_expect(stage.get_focus_id() == "", "mouse restores overview")
+	_expect(stage.get_focus_id() == "" and stage.get_zoom_step() == 0, "overview restores the default framing")
 	await _click_caption("Следующий ракурс")
 	await _settle()
 	_expect(stage.get_focus_id() == "sandwiches" and "sandwiches" not in store.get_snapshot().inspected_details, "alternate view focuses sandwiches without recording")
@@ -253,6 +262,17 @@ func _click_at(position: Vector2) -> void:
 		root.push_input(event, true)
 		await process_frame
 	await process_frame
+
+
+func _wheel_at(position: Vector2, direction: MouseButton) -> void:
+	for pressed in [true, false]:
+		var event := InputEventMouseButton.new()
+		event.button_index = direction
+		event.pressed = pressed
+		event.position = position
+		event.global_position = position
+		root.push_input(event, true)
+		await process_frame
 
 
 func _test_head_look() -> void:

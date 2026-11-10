@@ -38,12 +38,13 @@ func _run() -> void:
 	_expect(store.dispatch({"type":"MOVE_PACKAGE","destination":"desk"}).ok, "move for checkpoint")
 	ui._show_inspection()
 	ui._preview_detail("napkin")
+	ui.get("_inspection").set_zoom_step(3)
 	await process_frame
 	saved = Saves.load_shift(path)
-	_expect(saved.view.get("detail") == "napkin" and saved.state.inspected_details.is_empty(), "unrecorded close-up is saved separately from evidence")
+	_expect(saved.view.get("detail") == "napkin" and saved.view.get("zoom_step") == 3 and saved.state.inspected_details.is_empty(), "unrecorded close-up and zoom are saved separately from evidence")
 	ui._return_to_title()
 	await ui._resume_shift()
-	_expect(ui.get("_inspection").get_focus_id() == "napkin" and store.get_snapshot().inspected_details.is_empty(), "resuming a preview does not discover the clue")
+	_expect(ui.get("_inspection").get_focus_id() == "napkin" and ui.get("_inspection").get_zoom_step() == 3 and store.get_snapshot().inspected_details.is_empty(), "resuming a zoomed preview does not discover the clue")
 	ui._inspect_detail("napkin")
 	await process_frame
 	saved = Saves.load_shift(path)

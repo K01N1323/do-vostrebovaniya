@@ -776,25 +776,25 @@ func _build_lighting() -> void:
 	world.name = "BureauEnvironment"
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color("1f2523")
+	environment.background_color = Color("172321")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("999a96")
-	environment.ambient_light_energy = 0.16
+	environment.ambient_light_color = Color("9aa9a3")
+	environment.ambient_light_energy = 0.18
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	world.environment = environment
 	add_child(world)
 	var daylight := DirectionalLight3D.new()
 	daylight.name = "StationEveningLight"
 	daylight.rotation_degrees = Vector3(-48, -23, 0)
-	daylight.light_color = Color("abb2b8")
-	daylight.light_energy = 0.30
+	daylight.light_color = Color("8eb1b6")
+	daylight.light_energy = 0.26
 	daylight.shadow_enabled = true
 	daylight.directional_shadow_max_distance = 15
 	add_child(daylight)
 	var face_light := OmniLight3D.new()
 	face_light.name = "VisitorFluorescent"
 	face_light.position = Vector3(-0.25, 2.52, -0.40)
-	face_light.light_color = Color("c5c9c5")
+	face_light.light_color = Color("a5c7b6")
 	face_light.light_energy = 0.35
 	face_light.omni_range = 3.2
 	add_child(face_light)
@@ -808,10 +808,17 @@ func _build_lighting() -> void:
 	var hall_light := OmniLight3D.new()
 	hall_light.name = "ColdWaitingHallLight"
 	hall_light.position = Vector3(-0.6, 2.72, -3.4)
-	hall_light.light_color = Color("b4c1c6")
-	hall_light.light_energy = 0.32
+	hall_light.light_color = Color("82c5bf")
+	hall_light.light_energy = 0.48
 	hall_light.omni_range = 4.5
 	add_child(hall_light)
+	var platform_light := OmniLight3D.new()
+	platform_light.name = "PlatformSpill"
+	platform_light.position = Vector3(-1.6, 2.05, -6.12)
+	platform_light.light_color = Color("459b9b")
+	platform_light.light_energy = 0.58
+	platform_light.omni_range = 2.3
+	add_child(platform_light)
 
 func _add_highlight(parent: Node3D, target_id: String, size: Vector3, position: Vector3) -> void:
 	var material := G.material(Color("a79a69"))

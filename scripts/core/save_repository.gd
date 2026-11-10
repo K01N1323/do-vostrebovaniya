@@ -91,6 +91,9 @@ static func _valid_view(view: Dictionary, state: Dictionary) -> bool:
 			var item: Dictionary = state.package if id == state.package.id else Rules.auxiliary_item(state, id)
 			if item.is_empty() or item.location != "desk" or not item.opened:
 				return false
+			var zoom: Variant = view.get("zoom_step", 0)
+			if not (zoom is int or zoom is float) or zoom < 0 or zoom > 6 or zoom != floorf(zoom):
+				return false
 			var detail: Variant = view.get("detail", "")
 			var details: Array = Cases.LOOSE_FINDS.get(id, Cases.get_case(state.case_id if id == state.package.id else Cases.future_case(state.case_id, id)).get("details", []))
 			return detail is String and (detail.is_empty() or detail in details and (detail != "zipper" or item.get("lining_lifted", false)))
