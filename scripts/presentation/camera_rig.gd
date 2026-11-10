@@ -28,6 +28,8 @@ var _transition: Tween
 var _looking: bool = false
 var _base_rotation := Vector3.ZERO
 var _look_offset := Vector2.ZERO
+var _dialogue := false
+var _paired_dialogue := false
 
 @onready var _camera: Camera3D = $Camera3D
 
@@ -37,6 +39,14 @@ func _ready() -> void:
 
 func get_camera() -> Camera3D:
 	return _camera if is_instance_valid(_camera) else get_node_or_null("Camera3D") as Camera3D
+
+func set_dialogue_framing(active: bool, paired: bool) -> void:
+	if _dialogue == active and _paired_dialogue == paired:
+		return
+	_dialogue = active
+	_paired_dialogue = paired
+	if current_view in ["window", "bus"]:
+		focus(current_view)
 
 func focus(view_id: String) -> void:
 	if not VIEWS.has(view_id):
@@ -51,6 +61,12 @@ func focus(view_id: String) -> void:
 	# No translation tween, no dolly: local/global eye coordinates stay fixed.
 	_camera.position = EYE
 	var view: Dictionary = VIEWS[view_id]
+	if _dialogue:
+		match view_id:
+			"window":
+				view = {"target": Vector3(-0.20, 1.40, -0.94), "fov": 42.0 if _paired_dialogue else 34.0}
+			"bus":
+				view = {"target": Vector3(-0.58, 1.45, -4.60), "fov": 24.0}
 	var next_transform := Transform3D(Basis.IDENTITY, EYE).looking_at(view["target"], Vector3.UP)
 	_base_rotation = next_transform.basis.get_euler()
 	if reduced_motion:

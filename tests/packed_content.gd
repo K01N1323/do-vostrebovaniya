@@ -20,7 +20,7 @@ func _run() -> void:
 	root.add_child(main)
 	var room: Node3D = main.get_node("Room")
 	room.set_reduced_motion(true)
-	_expect(ProjectSettings.get_setting("application/config/version") == "0.12.0", "packed version is 0.12.0")
+	_expect(ProjectSettings.get_setting("application/config/version") == "0.13.0", "packed version is 0.13.0")
 	_expect(store.dispatch({"type":"START"}).ok, "packed shift starts")
 	for case_id in Cases.ORDER:
 		if case_id == "finale":
@@ -29,7 +29,11 @@ func _run() -> void:
 		_expect(store.get_snapshot().case_id == case_id, "packed sequence selects " + case_id)
 		_expect(store.content.dialogues.has("greeting") and store.content.details.has(detail), "packed JSON contains " + case_id)
 		_expect(ResourceLoader.exists(store.content.presentation.portrait), "packed portrait exists for " + case_id)
+		var portrait := room.find_child(case_id.capitalize() + "Portrait", true, false) as Sprite3D
+		_expect(is_instance_valid(portrait) and portrait.hframes == 3, "packed room renders three poses for " + case_id)
 		for id in Cases.get_case(case_id).documents:
+			if id.ends_with("identity"):
+				_expect(ResourceLoader.exists(store.content.documents[id].portrait), "packed identity photograph " + id)
 			_expect(store.dispatch({"type":"READ_DOCUMENT","document_id":id}).ok,"packed paper " + id)
 		_expect(store.dispatch({"type":"MOVE_PACKAGE","destination":"desk"}).ok,"packed move " + case_id)
 		if case_id == "melnikovs":

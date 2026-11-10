@@ -50,6 +50,13 @@ func _play_melnikovs(recipient: String) -> bool:
 	await _capture(name_value + "-pair-arrival")
 	await _finish_reply()
 	_expect(_find_button(ui,"Почему язычок под тканью?") == null, "hidden detail question stays unavailable")
+	await _click_caption("Вы уезжаете вместе?")
+	var pair := room.find_child("MelnikovsPortrait", true, false) as Sprite3D
+	_expect(pair.hframes == 3 and pair.frame == 2, "Leonid leans in and Vera pulls her scarf closer")
+	await _capture(name_value + "-pair-parting")
+	await _click_caption("Далее")
+	_expect(pair.frame == 1, "Vera's line switches the pair to her reaction")
+	await _finish_reply()
 	await _click_caption("Кто помнит код замка?")
 	_expect("lock_code" in store.get_snapshot().asked_topics, "Leonid's code testimony recorded")
 	await _capture(name_value + "-code-dialogue")

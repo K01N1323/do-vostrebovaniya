@@ -211,6 +211,8 @@ func _valid_content(value: Dictionary, case_id: String = "nina") -> bool:
 	for id in definition.documents:
 		if not _text_record(value.documents.get(id)):
 			return false
+		if value.documents[id].has("portrait") and not _valid_portrait(value.documents[id].portrait):
+			return false
 		if not value.get("document_labels", {}).get(id) is String:
 			return false
 	for id in definition.details:

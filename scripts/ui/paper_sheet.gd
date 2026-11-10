@@ -63,6 +63,8 @@ func compose(record: Dictionary, id: String, captions: Dictionary, shared_claim:
 			"clerk_identity": crop = Rect2(0, 0, 1, 1)
 			"vera_identity": crop = Rect2(0.19, 0.035, 0.26, 0.22)
 			"leonid_identity": crop = Rect2(0.52, 0.025, 0.26, 0.22)
+		if record.has("portrait"):
+			crop = Rect2(0, 0, 1, 1)
 		sheet_body.add_child(_identity_photo(portrait_path, crop, Vector2(72, 92)))
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -103,7 +105,8 @@ func _identity_booklet(record: Dictionary, portrait_path: String, typewriter: Fo
 	frame.content_margin_bottom = 5
 	backing.add_theme_stylebox_override("panel", frame)
 	portrait_column.add_child(backing)
-	backing.add_child(_identity_photo(portrait_path, Rect2(0.32, 0.025, 0.39, 0.29), Vector2(118, 150)))
+	var crop := Rect2(0, 0, 1, 1) if record.has("portrait") else Rect2(0.32, 0.025, 0.39, 0.29)
+	backing.add_child(_identity_photo(record.get("portrait", portrait_path), crop, Vector2(118, 150)))
 	_label(portrait_column,"ТАБЕЛЬНЫЙ
 № 047",16,INK).add_theme_font_override("font",typewriter)
 	var seal := _label(portrait_column,"ХОЗ. СЛУЖБА

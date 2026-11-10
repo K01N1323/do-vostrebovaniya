@@ -200,7 +200,7 @@ func _check_art_sources() -> void:
 	_check(is_instance_valid(portrait) and portrait.texture != null, "Nina uses a loaded portrait texture")
 	if is_instance_valid(portrait) and portrait.texture != null:
 		art_sources["character"] = portrait.texture.resource_path
-		_check(portrait.texture.resource_path == "res://assets/characters/nina-v2.png", "Room uses Nina v2 rather than the old portrait")
+		_check(portrait.hframes == 3 and portrait.texture.resource_path.ends_with("performances/nina.png"), "Room uses Nina's three drawn poses")
 	for node in room.find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := node as MeshInstance3D
 		if mesh_instance.mesh == null:

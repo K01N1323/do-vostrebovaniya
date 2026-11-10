@@ -3,9 +3,12 @@ extends Control
 signal focus_requested(view_id: String)
 signal modal_changed(blocked: bool)
 signal motion_changed(reduced: bool)
+signal dialogue_pose_changed(pose: int, duration: float, at_bus: bool)
+signal dialogue_framing_changed(active: bool, paired: bool)
 
 const Cases = preload("res://scripts/core/case_definitions.gd")
 const Rules = preload("res://scripts/core/state_reducer.gd")
+const VisitorActing = preload("res://scripts/presentation/visitor_performance.gd")
 const StationAudio = preload("res://scripts/presentation/station_audio.gd")
 const Paper = preload("res://scripts/ui/paper_sheet.gd")
 const INK := Color("272c27")
@@ -44,6 +47,8 @@ var _action_panel: PanelContainer
 var _actions_button: Button
 var _hovered_target := ""
 var _hud: Control
+var _brand: Label
+var _footer: PanelContainer
 var _menu_status: Label
 var _save_message: Label
 var _pause_return: Dictionary = {}
@@ -55,6 +60,9 @@ var _can_advance := false
 var _speech_parts: Array[String] = []
 var _speech_index := 0
 var _speech_choices: VBoxContainer
+var _speech_heading: Label
+var _speech_prefix := 0
+var _speech_at_bus := false
 var _typewriter_font: SystemFont
 var _heading_font: SystemFont
 
@@ -98,9 +106,9 @@ func _build_shell() -> void:
 	_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_hud)
-	var brand := _label(_hud,"БЮРО НАХОДОК",18,GOLD)
-	brand.position = Vector2(26,22)
-	brand.add_theme_font_override("font",_typewriter_font)
+	_brand = _label(_hud,"БЮРО НАХОДОК",18,GOLD)
+	_brand.position = Vector2(26,22)
+	_brand.add_theme_font_override("font",_typewriter_font)
 	objective = _label(_hud,"Ожидается посетитель",16,LIGHT)
 	objective.position = Vector2(26,48)
 	var pause := _button(_hud,"Пауза · Esc",_show_pause)
@@ -129,11 +137,11 @@ func _build_shell() -> void:
 	sidebar = VBoxContainer.new()
 	sidebar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(sidebar)
-	var footer := _panel(_hud,Color(0.02,0.025,0.02,0.52))
-	footer.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	footer.offset_top = -62
+	_footer = _panel(_hud,Color(0.02,0.025,0.02,0.52))
+	_footer.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_footer.offset_top = -62
 	var nav := HBoxContainer.new()
-	footer.add_child(_margin(nav,18,7))
+	_footer.add_child(_margin(nav,18,7))
 	for entry in [["window","1 · Посетитель"],["shelf","2 · Моя полка"],["desk","3 · Стол"],["personal","4 · Под столом"]]:
 		var id: String = entry[0]
 		var button := _button(nav,entry[1],func(): _focus(id))
@@ -294,11 +302,13 @@ func _show_waiting_serov() -> void:
 		return
 	_close_modal()
 	_focus("bus")
-	_begin_modal("Семён Серов · у выхода на посадку", "dialogue")
-	modal.position.y = 610
-	modal.size.y = 185
-	_text(modal_body, GameStore.get_case_content("serov").waiting, 20)
-	_button(modal_body,"К работе",_close_modal)
+	_begin_modal("У выхода на посадку", "dialogue")
+	_speech_at_bus = true
+	var line: String = GameStore.get_case_content("serov").waiting
+	_text(modal_body, line, 21)
+	_layout_dialogue(155)
+	_dialogue_button(modal_body,"К работе",_close_modal)
+	_speak_line(line, "serov", "waiting", 0)
 
 func _next_step(state: Dictionary) -> String:
 	if not state.started:
@@ -674,16 +684,20 @@ func _show_conversation(arrival: bool = false) -> void:
 	_close_modal()
 	_focus("window")
 	_begin_modal("Нина Лукина" if snapshot.case_id == "finale" else _p().name,"dialogue")
+	_speech_at_bus = false
+	_speech_prefix = 0
 	dialogue_text = _text(modal_body,"",21)
 	dialogue_text.name = "SpeechText"
 	# A bounded text area avoids transient auto-height from an unlaid-out width.
 	dialogue_text.fit_content = false
 	dialogue_text.scroll_active = true
-	dialogue_text.custom_minimum_size.y = 82
+	dialogue_text.custom_minimum_size.y = 98
 	_speech_choices = VBoxContainer.new()
+	_speech_choices.add_theme_constant_override("separation", 3)
 	modal_body.add_child(_speech_choices)
 	var speech: String = GameStore.content.dialogues.get(snapshot.dialogue_id, "")
 	if arrival and snapshot.case_id == "serov":
+		_speech_prefix = 1
 		var camera_outcome: String = snapshot.completed_cases.gleb.decision
 		speech = GameStore.content.camera_followup[camera_outcome] + "\n" + speech
 	elif snapshot.case_id == "finale":
@@ -714,30 +728,61 @@ func _set_speech(text_value: String) -> void:
 	_refresh_speech()
 
 func _refresh_speech() -> void:
-	dialogue_text.text = _speech_parts[_speech_index]
+	var line := _speech_parts[_speech_index]
+	dialogue_text.text = line
+	_speech_heading.modulate.a = 0.0 if VisitorActing.SPEAKERS.has(line.get_slice(":", 0)) else 1.0
+	_speak_line(line, snapshot.case_id, snapshot.dialogue_id, maxi(0, _speech_index - _speech_prefix))
 	_clear(_speech_choices)
 	if _speech_index < _speech_parts.size()-1:
-		modal.size.y = 215
-		modal.position.y = 605
-		_button(_speech_choices,"Далее",func(): _speech_index+=1; _refresh_speech())
+		_layout_dialogue(185)
+		_dialogue_button(_speech_choices,"Далее",func():
+			_speech_index += 1
+			_refresh_speech())
 		return
-	var many_topics: bool = Cases.get_case(snapshot.case_id).topics.size() > 3
-	modal.size.y = 320 if many_topics else 260
-	modal.position.y = 500 if many_topics else 560
-	var topics := GridContainer.new()
-	topics.columns = 2 if many_topics else 3
-	_speech_choices.add_child(topics)
 	var definition: Dictionary = Cases.get_case(snapshot.case_id)
+	var topics := GridContainer.new()
+	topics.columns = 2
+	topics.add_theme_constant_override("h_separation", 24)
+	topics.add_theme_constant_override("v_separation", 3)
+	_speech_choices.add_child(topics)
+	var shown := 0
 	for id in definition.topics:
 		var topic: String = id
 		if definition.topic_requires.has(topic) and definition.topic_requires[topic] not in snapshot.inspected_details:
 			continue
-		var button := _button(topics,GameStore.content.topic_labels[topic],func():
+		var option := _dialogue_button(topics,GameStore.content.topic_labels[topic],func():
 			if GameStore.dispatch({"type":"ASK_TOPIC","topic_id":topic}).ok:
+				_speech_prefix = 0
 				_set_speech(GameStore.content.dialogues[topic]))
-		button.add_theme_font_size_override("font_size",15)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_button(_speech_choices,"К работе",_close_modal)
+		option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		option.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		shown += 1
+	_layout_dialogue(185 + ceili(shown / 2.0) * 33)
+	_dialogue_button(_speech_choices,"К работе",_close_modal)
+
+func _layout_dialogue(height: float) -> void:
+	modal.size.y = height
+	_align_dialogue_bottom(modal)
+
+func _align_dialogue_bottom(panel: Control) -> void:
+	panel.position.y = size.y - 12.0 - panel.size.y
+
+func _dialogue_button(parent: Node, label: String, action: Callable) -> Button:
+	var button := _button(parent, label, action)
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.custom_minimum_size.y = 29
+	button.add_theme_font_size_override("font_size", 17)
+	button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	button.add_theme_stylebox_override("hover", _style(Color(0.34, 0.40, 0.34, 0.26), Color.TRANSPARENT, 0))
+	button.add_theme_stylebox_override("pressed", _style(Color(0.34, 0.40, 0.34, 0.43), Color.TRANSPARENT, 0))
+	return button
+
+func _speak_line(line: String, case_id: String, dialogue: String, index: int) -> void:
+	var speaker := VisitorActing.speaker(line, case_id)
+	var pose := VisitorActing.pose(case_id, dialogue, index, speaker)
+	var voice_length := 0.60 if speaker == VisitorActing.actor(case_id) or speaker in ["vera", "leonid"] else 0.0
+	dialogue_pose_changed.emit(pose, voice_length, _speech_at_bus)
+	_sound.speak(speaker, line)
 
 func _show_decision() -> void:
 	if snapshot.case_id == "finale":
@@ -770,7 +815,11 @@ func _decide(type: String, recipient: String = "") -> void:
 	_action_panel.hide()
 	_show_hint("Обращение завершено.")
 	_begin_modal(_p().first_name,"result")
-	_text(modal_body,GameStore.content.reactions[Cases.outcome_key(snapshot)],21)
+	var outcome := Cases.outcome_key(snapshot)
+	var reaction: String = GameStore.content.reactions[outcome]
+	_text(modal_body,reaction,21)
+	_speech_at_bus = false
+	_speak_line(reaction.get_slice("\n", 0), snapshot.case_id, outcome, 0)
 	var buttons := HBoxContainer.new()
 	modal_body.add_child(buttons)
 	_button(buttons,"К работе",_close_modal)
@@ -1086,6 +1135,7 @@ func _begin_modal(title: String, kind: String) -> void:
 	else:
 		_close_modal()
 	_modal_kind = kind
+	_set_dialogue_presentation(kind == "dialogue")
 	hint.hide()
 	interaction_hint.hide()
 	_action_panel.hide()
@@ -1094,7 +1144,9 @@ func _begin_modal(title: String, kind: String) -> void:
 	modal.name = "ContentPanel"
 	var rect: Rect2
 	match kind:
-		"dialogue": rect = Rect2(220,520,950,300)
+		"dialogue":
+			rect = Rect2(270, 703, 900, 185)
+			modal.add_theme_stylebox_override("panel", _style(Color(0.013, 0.019, 0.016, 0.89), Color.TRANSPARENT, 0))
 		"result": rect = Rect2(30,480,740,340) if snapshot.case_id == "melnikovs" else Rect2(30,570,620,250)
 		"document": rect = Rect2(36,118,555,680)
 		"comparison": rect = Rect2(36,500,1100,320)
@@ -1109,13 +1161,26 @@ func _begin_modal(title: String, kind: String) -> void:
 	modal.add_child(_margin(modal_body,18,14))
 	var top := HBoxContainer.new()
 	modal_body.add_child(top)
-	var heading := _label(top,title,21,GOLD)
+	var heading := _label(top,title,15 if kind == "dialogue" else 21,GOLD)
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var close := _button(top,"Закрыть · Esc",_close_modal)
+	var close := _dialogue_button(top, "Закрыть · Esc", _close_modal) if kind == "dialogue" else _button(top,"Закрыть · Esc",_close_modal)
 	close.add_theme_font_size_override("font_size",14)
 	close.custom_minimum_size.y = 28
-	_rule(modal_body)
+	if kind == "dialogue":
+		_speech_heading = heading
+		modal_body.add_theme_constant_override("separation", 4)
+		modal.resized.connect(_align_dialogue_bottom.bind(modal))
+		_align_dialogue_bottom(modal)
+	else:
+		_rule(modal_body)
 	modal_changed.emit(kind not in ["dialogue","result"])
+
+func _set_dialogue_presentation(active: bool) -> void:
+	_brand.visible = not active
+	objective.visible = not active
+	_footer.visible = not active
+	_actions_button.visible = not active
+	dialogue_framing_changed.emit(active, snapshot.get("case_id") == "melnikovs")
 
 func _set_paused(value: bool) -> void:
 	get_tree().paused = value
@@ -1133,8 +1198,14 @@ func _close_modal(keep_resume: bool = false) -> void:
 		if is_instance_valid(modal):
 			modal.process_mode = Node.PROCESS_MODE_INHERIT
 			modal.show()
+			_set_dialogue_presentation(_modal_kind == "dialogue")
 			modal_changed.emit(_modal_kind not in ["dialogue", "result"])
 			return
+	if _modal_kind in ["dialogue", "result"]:
+		_sound.stop_speech()
+		dialogue_pose_changed.emit(0, 0.0, _speech_at_bus)
+		_speech_at_bus = false
+		_set_dialogue_presentation(false)
 	if not keep_resume:
 		GameStore.set_resume_view({})
 	if is_instance_valid(modal):

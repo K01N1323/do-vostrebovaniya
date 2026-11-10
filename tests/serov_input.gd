@@ -58,8 +58,13 @@ func _play_serov(decision: String) -> bool:
 	await _finish_reply()
 	_expect(ui.dialogue_text.text.contains("помнит"), "Pavel recognizes Serov and remembers the act")
 	await _click_caption("Вспомнить дело о сумке")
+	var portrait := room.find_child("SerovPortrait", true, false) as Sprite3D
+	_expect(portrait.hframes == 3 and portrait.frame == 1, "Serov grips his wrist while recalling the old case")
+	await _capture(decision + "-serov-past")
 	await _finish_reply()
 	await _click_caption("Куда вы едете?")
+	_expect(portrait.frame == 2, "Serov opens his hands when speaking about his daughter")
+	await _capture(decision + "-serov-trip")
 	await _finish_reply()
 	await _key(KEY_ESCAPE)
 	_expect("past" in store.get_snapshot().asked_topics and "trip" in store.get_snapshot().asked_topics, "two story topics heard before the decision")

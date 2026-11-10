@@ -54,6 +54,8 @@ func _play_gleb(decision: String) -> bool:
 	_expect(_find_button(ui,"Вы сказали: чёрный корпус?") == null and _find_button(ui,"Где плёнка из заявления?") == null, "contradiction questions wait for their observations")
 	await _click_caption("Что было с лампой Нины?")
 	_expect("repair" in store.get_snapshot().asked_topics, "repair conversation is available without implying ownership")
+	var portrait := room.find_child("GlebPortrait", true, false) as Sprite3D
+	_expect(portrait.hframes == 3 and portrait.frame == 1, "Gleb relaxes while talking about the repair")
 	await _capture(decision + "-gleb-repair")
 	await _key(KEY_ESCAPE)
 	await _click_caption("Сравнить обе бумаги")
@@ -97,6 +99,7 @@ func _play_gleb(decision: String) -> bool:
 	await _finish_reply()
 	await _click_caption("Где плёнка из заявления?")
 	_expect("film_mismatch" in store.get_snapshot().asked_topics, "onions unlock the missing-film discrepancy")
+	_expect(portrait.frame == 2, "Gleb leans in while answering the discrepancy")
 	await _capture(decision + "-gleb-film-reply")
 	await _key(KEY_ESCAPE)
 	await _click_caption("Вернуть на полку · пока думаю")

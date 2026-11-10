@@ -75,6 +75,7 @@ func _run() -> void:
 	_expect(not is_instance_valid(_ui.get("_start_screen")), "preparation screen closes")
 	_expect(_ui.get("_modal_kind") == "dialogue", "visitor arrival opens compact greeting")
 	await _test_conversation("arrival greeting", true)
+	await _test_visitor_audio_and_idle()
 	await _test_fixed_eye()
 	_test_pause_and_motion()
 	for decision in ["issue", "retain", "appropriate"]:
@@ -329,13 +330,38 @@ func _test_conversation(label: String, expect_chunks: bool) -> void:
 	if expect_chunks:
 		_expect(is_instance_valid(next), label + ": long greeting exposes next chunk")
 	if is_instance_valid(next) and is_instance_valid(speech):
+		var portrait := _room.find_child("NinaPortrait", true, false) as Sprite3D
+		var pose := portrait.frame
 		var old_text: String = speech.text
 		var package_before: Dictionary = _snapshot()["package"].duplicate(true)
 		next.pressed.emit()
 		await _frames()
 		_expect(speech.text != old_text, label + ": next displays another speech chunk")
+		_expect(portrait.hframes == 3 and portrait.frame != pose, label + ": next selects the drawn pose for the current line")
 		_expect(_snapshot()["package"] == package_before, label + ": speech progress leaves package unchanged")
 	_ui.call("_close_modal")
+
+func _test_visitor_audio_and_idle() -> void:
+	var portrait := _room.find_child("NinaPortrait", true, false) as Sprite3D
+	var before := portrait.position
+	await create_timer(0.18).timeout
+	_expect(portrait.frame == 0 and not portrait.position.is_equal_approx(before), "waiting visitor returns to neutral and shifts weight")
+	var sound: Node = _ui.get("_sound")
+	var music: AudioStreamPlayer = sound.get("_music")
+	var voice: AudioStreamPlayer = sound.get("_voice")
+	_expect(not music.playing, "mute keeps music silent")
+	_ui.call("_set_muted", false)
+	_ui.call("_show_conversation")
+	_expect(music.playing and music.stream.loop_mode == AudioStreamWAV.LOOP_FORWARD, "music loops through the shift")
+	_expect(voice.playing, "a line plays the visitor's murmur")
+	_ui.call("_show_pause")
+	_expect(music.stream_paused and voice.stream_paused, "pause suspends music and voice")
+	_ui.call("_close_modal")
+	_expect(not music.stream_paused and not voice.stream_paused, "resume restores music and the current voice")
+	_ui.call("_close_modal")
+	_expect(not voice.playing and music.playing, "closing dialogue stops just the murmur")
+	_ui.call("_set_muted", true)
+	_expect(not music.playing, "mute stops music during the shift")
 
 
 func _check_panel(label: String, blocked: bool) -> void:

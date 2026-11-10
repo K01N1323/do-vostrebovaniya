@@ -20,6 +20,9 @@ func _ready() -> void:
 	room.visitor_departed.connect(_refresh_transition)
 	room.handover_finished.connect(_refresh_transition)
 	game_ui.focus_requested.connect(camera_rig.focus)
+	game_ui.dialogue_framing_changed.connect(camera_rig.set_dialogue_framing)
+	game_ui.dialogue_framing_changed.connect(room.set_dialogue_framing)
+	game_ui.dialogue_pose_changed.connect(room.set_dialogue_pose)
 	camera_rig.view_changed.connect(room.set_view)
 	game_ui.modal_changed.connect(func(blocked: bool):
 		room.set_input_enabled(not blocked)

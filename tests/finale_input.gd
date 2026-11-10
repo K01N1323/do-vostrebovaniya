@@ -2,7 +2,7 @@ extends "res://tests/serov_input.gd"
 ## A complete graphical shift for each ending through the public UI.
 
 func _version() -> String:
-	return "0.12"
+	return "0.13"
 
 func _play_serov(decision: String) -> bool:
 	if not await super._play_serov(decision):

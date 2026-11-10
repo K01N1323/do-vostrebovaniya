@@ -3,8 +3,16 @@ extends Node
 
 const SAMPLE_RATE := 22050
 const DURATIONS := {"hall": 2.0, "steps": 1.1, "paper": 0.26, "latch": 0.24, "stamp": 0.23, "boarding": 1.40}
+const SCORE = preload("res://assets/audio/last-shift.wav")
+const VOICES := {
+	"nina":1.29, "fedor":0.86, "vera":1.42, "leonid":1.08,
+	"gleb":1.16, "serov":0.78, "pavel":1.02, "dispatcher":1.36,
+}
 
 var _hall: AudioStreamPlayer
+var _music: AudioStreamPlayer
+var _voice: AudioStreamPlayer
+var _murmurs: Array[AudioStreamWAV] = []
 var _effects: Dictionary = {}
 var _running := false
 var _muted := false
@@ -15,6 +23,16 @@ func _ready() -> void:
 	_hall.volume_db = -34
 	_hall.stream = _make_stream("hall")
 	add_child(_hall)
+	_music = AudioStreamPlayer.new()
+	_music.volume_db = -23
+	var score := SCORE.duplicate() as AudioStreamWAV
+	score.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	score.loop_end = int(score.get_length() * score.mix_rate)
+	_music.stream = score
+	add_child(_music)
+	_voice = AudioStreamPlayer.new()
+	_voice.volume_db = -16
+	add_child(_voice)
 
 func start(muted: bool) -> void:
 	_running = true
@@ -23,6 +41,8 @@ func start(muted: bool) -> void:
 func stop() -> void:
 	_running = false
 	_hall.stop()
+	_music.stop()
+	_voice.stop()
 	for player in _effects.values():
 		player.stop()
 
@@ -31,15 +51,22 @@ func set_muted(value: bool) -> void:
 	if _running and not _muted:
 		if not _hall.playing:
 			_hall.play()
+		if not _music.playing:
+			_music.play()
 		_hall.stream_paused = _paused
+		_music.stream_paused = _paused
 	else:
 		_hall.stop()
+		_music.stop()
+		_voice.stop()
 		for player in _effects.values():
 			player.stop()
 
 func set_paused(value: bool) -> void:
 	_paused = value
 	_hall.stream_paused = value
+	_music.stream_paused = value
+	_voice.stream_paused = value
 	for player in _effects.values():
 		player.stream_paused = value
 
@@ -53,6 +80,50 @@ func cue(id: String) -> void:
 		add_child(player)
 		_effects[id] = player
 	_effects[id].play()
+
+func speak(speaker: String, phrase: String) -> void:
+	_voice.stop()
+	if not _running or _muted or _paused or not VOICES.has(speaker):
+		return
+	if _murmurs.is_empty():
+		for i in 3:
+			_murmurs.append(_make_murmur(i))
+	_voice.stream = _murmurs[absi(phrase.hash()) % _murmurs.size()]
+	_voice.pitch_scale = VOICES[speaker]
+	_voice.volume_db = -21 if speaker == "dispatcher" else -16
+	_voice.play()
+
+func stop_speech() -> void:
+	_voice.stop()
+
+func _make_murmur(pattern: int) -> AudioStreamWAV:
+	var syllables: Array = [[0.16, 0.13, 0.19], [0.23, 0.17], [0.13, 0.19, 0.17, 0.13]][pattern]
+	var data := PackedByteArray()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7921 + pattern
+	for index in syllables.size():
+		var duration: float = syllables[index]
+		var count := int(duration * SAMPLE_RATE)
+		var offset := data.size()
+		data.resize(offset + count * 2)
+		var formant: Vector2 = [Vector2(430, 930), Vector2(660, 1280), Vector2(330, 830)][(index + pattern) % 3]
+		var phase := 0.0
+		for i in count:
+			var t := float(i) / SAMPLE_RATE
+			var progress := t / duration
+			var pitch := 104.0 + 15.0 * sin(PI * progress) - 8.0 * index
+			phase = fposmod(phase + pitch / SAMPLE_RATE, 1.0)
+			var cycle := phase / pitch
+			var resonant := exp(-cycle * 465.0) * (sin(TAU * formant.x * cycle) + 0.35 * sin(TAU * formant.y * cycle))
+			var body := 0.22 * sin(TAU * phase) + 0.58 * resonant
+			var envelope := smoothstep(0.0, 0.15, progress) * (1.0 - smoothstep(0.68, 1.0, progress))
+			var sample := envelope * (body * 0.72 + 0.04 * rng.randf_range(-1.0, 1.0))
+			data.encode_s16(offset + i * 2, int(sample * 32767.0))
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = SAMPLE_RATE
+	stream.data = data
+	return stream
 
 func _make_stream(id: String) -> AudioStreamWAV:
 	var count := int(DURATIONS[id] * SAMPLE_RATE)

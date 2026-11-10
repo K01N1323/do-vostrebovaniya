@@ -8,6 +8,8 @@ signal sound_requested(id: String)
 signal handover_finished
 signal visitor_departed
 
+const Portrait = preload("res://scripts/presentation/visitor_portrait.gd")
+const VisitorActing = preload("res://scripts/presentation/visitor_performance.gd")
 const StationShell = preload("res://scripts/presentation/station_shell.gd")
 const Packages = preload("res://scripts/presentation/package_registry.gd")
 const G = preload("res://scripts/presentation/geometry.gd")
@@ -35,6 +37,8 @@ var _pointer_position := Vector2.ZERO
 var _highlights: Dictionary = {}
 var _visitor: Node3D
 var _visitor_geometry: Node3D
+var _active_portrait: Portrait
+var _bus_portrait: Portrait
 var _visitor_target: StaticBody3D
 var _waiting_serov: Node3D
 var _waiting_serov_target: StaticBody3D
@@ -49,9 +53,10 @@ var _inner_door: Node3D
 var _outer_door: Node3D
 var _inner_open: bool = false
 var _outer_open: bool = false
-var _face_height: float = 1.56
-var _face_depth: float = 0.17
+var _face_height: float = 1.60
+var _face_depth: float = 0.06
 var _view_id: String = "window"
+var _dialogue_framing := false
 var _package_views: Dictionary = {}
 var _paper_titles: Dictionary = {}
 
@@ -248,10 +253,17 @@ func set_view(view_id: String) -> void:
 	if _has_snapshot:
 		_render_auxiliary_finds()
 
+func set_dialogue_framing(active: bool, _paired: bool) -> void:
+	_dialogue_framing = active
+	_update_package_lid()
+
 func _update_package_lid() -> void:
 	if not is_instance_valid(_package) or transfer_active:
 		return
 	var package_state: Dictionary = _snapshot.get("package", {})
+	if package_state.get("id") == "P01" and package_state.get("location") == "desk":
+		# Keep the tall carrier handle out of the speaking opening.
+		_package.position.x = -0.88 if _dialogue_framing and _view_id == "window" else PACKAGE_POSITIONS.desk.x
 	# Opened records knowledge; the lid closes when looking back at the visitor.
 	_package.set_opened(bool(package_state.get("opened", false)) and package_state.get("location", "shelf") == "desk" and _view_id == "desk")
 	if _package.has_method("set_unlocked"):
@@ -274,7 +286,8 @@ func get_hatch_state() -> Dictionary:
 	return {"inner_open": _inner_open, "outer_open": _outer_open}
 
 func get_visitor_focus_position() -> Vector3:
-	return _visitor.global_position + Vector3(0, _face_height, _face_depth) if is_instance_valid(_visitor) else VISITOR_WAIT + Vector3(0, _face_height, _face_depth)
+	var face := Vector3(_active_portrait.anchor_position.x if is_instance_valid(_active_portrait) else 0.0, _face_height, _face_depth)
+	return (_visitor.global_position if is_instance_valid(_visitor) else VISITOR_WAIT) + face
 
 func set_hovered(target_id: String) -> void:
 	var changed := _hovered != target_id
@@ -579,11 +592,11 @@ func _build_cage() -> void:
 	G.box(self, Vector3(4.16, 0.86, 0.12), Vector3(-0.40, 0.43, -0.77), metal)
 	G.box(self, Vector3(4.22, 0.09, 0.43), Vector3(-0.40, 0.895, -0.76), timber)
 	# The face occupies the speaking opening. Bars remain prominent at its sides.
-	for x in [-2.45, -2.15, -1.87, -1.57, -1.27, -0.97, -0.67, -0.39, 0.39, 1.35, 1.65]:
+	for x in [-2.45, -2.15, -1.87, -1.57, -1.27, -0.97, -0.67, 0.39, 1.35, 1.65]:
 		G.rod(self, Vector3(x, 1.74 if x == 0.39 else 0.94, -0.75), Vector3(x, 2.65, -0.75), 0.017, metal)
 	for y in [2.02, 2.60]:
 		G.rod(self, Vector3(-2.48, y, -0.75), Vector3(1.69, y, -0.75), 0.027, metal)
-	G.rod(self, Vector3(-1.9, 1.20, -0.75), Vector3(-0.40, 1.20, -0.75), 0.014, edge)
+	G.rod(self, Vector3(-1.9, 1.20, -0.75), Vector3(-0.67, 1.20, -0.75), 0.014, edge)
 	G.rod(self, Vector3(1.33, 1.20, -0.75), Vector3(1.69, 1.20, -0.75), 0.014, edge)
 	G.box(self, Vector3(1.45, 0.26, 0.04), Vector3(-0.43, 2.14, -0.70), metal)
 	G.label(self, "БЮРО НАХОДОК", Vector3(-0.43, 2.14, -0.668), 25, Color("bbb89b"))
@@ -593,11 +606,11 @@ func _build_cage() -> void:
 		G.rod(self, Vector3(-2.45, 0, z), Vector3(-2.45, 2.65, z), 0.016, metal)
 	G.rod(self, Vector3(-2.45, 2.05, -0.75), Vector3(-2.45, 2.05, 1.9), 0.025, metal)
 	# Weld plates, slotted screws and a timber wear rail break the uniform grid.
-	for x in [-1.87, -1.27, -0.67, -0.39, 0.39, 1.35]:
+	for x in [-1.87, -1.27, -0.67, 0.39, 1.35]:
 		G.box(self, Vector3(0.073, 0.14, 0.018), Vector3(x, 2.02, -0.711), edge)
 		_screw_z(self, Vector3(x, 1.975, -0.695), 0.008, metal)
 		_screw_z(self, Vector3(x, 2.065, -0.695), 0.008, metal)
-	for x in [-1.87, -0.97, -0.39, 1.35]:
+	for x in [-1.87, -0.97, -0.67, 1.35]:
 		G.box(self, Vector3(0.12, 0.035, 0.13), Vector3(x, 0.961, -0.75), edge)
 	G.box(self, Vector3(1.41, 0.045, 0.055), Vector3(-1.19, 0.963, -0.51), timber)
 	G.box(self, Vector3(0.39, 0.135, 0.018), Vector3(-1.16, 0.69, -0.687), G.worn_material(Color("b7b09a"), "metal"))
@@ -704,12 +717,12 @@ func _build_nina() -> void:
 		G.rod(nina, Vector3(side * 0.27, 0.94, 0.14), Vector3(side * 0.17, 1.0, 0.42), 0.055, coat)
 		G.sphere(nina, 0.055, Vector3(side * 0.17, 1.0, 0.42), skin, Vector3(0.8, 0.45, 1.0))
 	_visitor_target = G.target(_visitor, "nina", Vector3(0.75, 1.2, 0.55), Vector3(0, 1.11, 0.05))
-	_load_nina_image_if_available()
 	_waiting_serov = Node3D.new()
 	_waiting_serov.name = "SerovAtBus"
 	_waiting_serov.position = BUS_WAIT
 	add_child(_waiting_serov)
-	_waiting_serov.add_child(_make_portrait("WaitingPortrait", GameStore.get_case_content("serov").presentation.portrait))
+	_bus_portrait = _make_portrait("WaitingPortrait", "serov", GameStore.get_case_content("serov").presentation.portrait, true)
+	_waiting_serov.add_child(_bus_portrait)
 	_waiting_serov_target = G.target(_waiting_serov, "serov", Vector3(0.75, 1.2, 0.55), Vector3(0, 1.11, 0.05))
 	_waiting_serov_target.collision_layer = 0
 	_serov_card = G.box(_waiting_serov, Vector3(0.087, 0.062, 0.004), Vector3(0.14, 1.145, 0.069), G.worn_material(Color("bea986"), "paper"), "CardWithSerov")
@@ -717,31 +730,6 @@ func _build_nina() -> void:
 	_serov_card.hide()
 	_waiting_serov.hide()
 	_set_visitor_phase("absent")
-
-func _load_nina_image_if_available() -> void:
-	var path := "res://assets/characters/nina-v2.png"
-	if not ResourceLoader.exists(path):
-		return
-	var texture := load(path) as Texture2D
-	if texture == null:
-		return
-	var sprite := Sprite3D.new()
-	sprite.set_script(preload("res://scripts/presentation/visitor_portrait.gd"))
-	sprite.name = "NinaPortrait"
-	sprite.texture = texture
-	sprite.pixel_size = 1.84 / float(texture.get_height())
-	sprite.position = Vector3(0, 0.92, 0.06)
-	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-	sprite.alpha_scissor_threshold = 0.05
-	sprite.no_depth_test = false
-	# The painted shadows belong to the portrait; avoid illuminating them twice.
-	sprite.shaded = false
-	sprite.modulate = Color(0.66, 0.84, 0.88)
-	_visitor.add_child(sprite)
-	_visitor_geometry.visible = false
-	_face_height = 1.600
-	_face_depth = 0.06
 
 func _configure_visitor(case_id: String) -> void:
 	var presentation: Dictionary = GameStore.get_case_content(case_id).presentation
@@ -752,34 +740,36 @@ func _configure_visitor(case_id: String) -> void:
 			"finale": _paper_titles.identity.text = "ЖУРНАЛ СМЕНЫ"
 			"melnikovs": _paper_titles.identity.text = "ДОКУМЕНТЫ · 2"
 			_: _paper_titles.identity.text = "ДОКУМЕНТ" if presentation.get("identity_layout") == "sheet" else "УДОСТОВЕРЕНИЕ"
-	var portrait_name := ("nina" if case_id == "finale" else case_id).capitalize() + "Portrait"
+	var actor := VisitorActing.actor(case_id)
+	var portrait_name := actor.capitalize() + "Portrait"
 	for child in _visitor.get_children():
 		if child is Sprite3D:
 			child.visible = str(child.name) == portrait_name
-	var portrait := _visitor.get_node_or_null(portrait_name) as Sprite3D
+	var portrait := _visitor.get_node_or_null(portrait_name) as Portrait
 	if not is_instance_valid(portrait):
-		portrait = _make_portrait(portrait_name, presentation.portrait)
+		portrait = _make_portrait(portrait_name, actor, presentation.portrait)
 		_visitor.add_child(portrait)
 	portrait.visible = true
-	var anchor := Vector3(-0.11 if case_id == "melnikovs" else 0.0, 0.92, 0.06)
-	portrait.set("anchor_position", anchor)
+	var anchor := Vector3(-0.16 if case_id == "melnikovs" else -0.20, 0.92, 0.06)
+	portrait.scale.x = 0.82 if case_id == "melnikovs" else 1.0
+	portrait.anchor_position = anchor
 	portrait.position = anchor
+	portrait.perform(0, 0.0)
+	_active_portrait = portrait
 	_visitor_geometry.visible = false
 	_visitor_target.set_meta("target_id", case_id)
 
-func _make_portrait(portrait_name: String, texture_path: String) -> Sprite3D:
-	var portrait := Sprite3D.new()
+func _make_portrait(portrait_name: String, id: String, fallback: String, at_bus: bool = false) -> Portrait:
+	var portrait := Portrait.new()
 	portrait.name = portrait_name
-	portrait.texture = load(texture_path)
-	portrait.pixel_size = 1.84 / float(portrait.texture.get_height())
-	portrait.position = Vector3(0, 0.92, 0.06)
-	portrait.set_script(preload("res://scripts/presentation/visitor_portrait.gd"))
-	portrait.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	portrait.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-	portrait.alpha_scissor_threshold = 0.05
-	portrait.shaded = false
-	portrait.modulate = Color(0.66, 0.84, 0.88)
+	portrait.configure(id, fallback, at_bus)
+	portrait.position = portrait.anchor_position
 	return portrait
+
+func set_dialogue_pose(pose: int, duration: float, at_bus: bool) -> void:
+	var portrait := _bus_portrait if at_bus and _waiting_serov.visible else _active_portrait
+	if is_instance_valid(portrait):
+		portrait.perform(pose, duration)
 
 func _build_lighting() -> void:
 	var world := WorldEnvironment.new()
