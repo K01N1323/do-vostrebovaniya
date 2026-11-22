@@ -1,10 +1,12 @@
 extends Node3D
-## All views are head turns from the same clerk's eye position.
+## Desk shortcuts turn the head. Two explicit destinations move the clerk.
 
 signal view_changed(view_id: String)
 
 const EYE := Vector3(0, 1.62, 1.25)
 const VIEWS := {
+	"walk_archive": {"eye": Vector3(-1.05, 1.62, 0.94), "target": Vector3(-0.83, 1.03, -0.24), "fov": 59.0},
+	"walk_platform": {"eye": Vector3(-0.92, 1.62, -0.04), "target": Vector3(-0.58, 1.52, -4.60), "fov": 48.0},
 	"archive": {"target": Vector3(-0.83, 1.07, -0.24), "fov": 51.0},
 	"personal_bag": {"target": Vector3(0.68, 0.62, -0.12), "fov": 46.0},
 	"bus": {"target": Vector3(-0.58, 1.52, -4.60), "fov": 30.0},
@@ -58,8 +60,6 @@ func focus(view_id: String) -> void:
 		return
 	if is_instance_valid(_transition):
 		_transition.kill()
-	# No translation tween, no dolly: local/global eye coordinates stay fixed.
-	_camera.position = EYE
 	var view: Dictionary = VIEWS[view_id]
 	if _dialogue:
 		match view_id:
@@ -67,16 +67,22 @@ func focus(view_id: String) -> void:
 				view = {"target": Vector3(-0.20, 1.40, -0.94), "fov": 42.0 if _paired_dialogue else 34.0}
 			"bus":
 				view = {"target": Vector3(-0.58, 1.45, -4.60), "fov": 24.0}
-	var next_transform := Transform3D(Basis.IDENTITY, EYE).looking_at(view["target"], Vector3.UP)
+	var eye: Vector3 = view.get("eye", EYE)
+	var walking := not _camera.position.is_equal_approx(eye)
+	var next_transform := Transform3D(Basis.IDENTITY, eye).looking_at(view["target"], Vector3.UP)
 	_base_rotation = next_transform.basis.get_euler()
 	if reduced_motion:
+		_camera.position = eye
 		_camera.quaternion = next_transform.basis.get_rotation_quaternion()
 		_camera.fov = float(view["fov"])
 	else:
 		_transition = create_tween().set_parallel(true)
 		_transition.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-		_transition.tween_property(_camera, "quaternion", next_transform.basis.get_rotation_quaternion(), 0.33)
-		_transition.tween_property(_camera, "fov", float(view["fov"]), 0.33)
+		var duration := 0.65 if walking else 0.33
+		if walking:
+			_transition.tween_property(_camera, "position", eye, duration)
+		_transition.tween_property(_camera, "quaternion", next_transform.basis.get_rotation_quaternion(), duration)
+		_transition.tween_property(_camera, "fov", float(view["fov"]), duration)
 	view_changed.emit(view_id)
 
 func _apply_view(view_id: String) -> void:
@@ -103,7 +109,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_look_offset.x = clampf(_look_offset.x - event.relative.y * 0.0022, -0.27, 0.27)
 		_look_offset.y = clampf(_look_offset.y - event.relative.x * 0.0022, -0.42, 0.42)
 		_camera.rotation = _base_rotation + Vector3(_look_offset.x, _look_offset.y, 0)
-		_camera.position = EYE
+		_camera.position = VIEWS[current_view].get("eye", EYE)
 		get_viewport().set_input_as_handled()
 
 func _exit_tree() -> void:

@@ -20,7 +20,7 @@ func _run() -> void:
 	root.add_child(main)
 	var room: Node3D = main.get_node("Room")
 	room.set_reduced_motion(true)
-	_expect(ProjectSettings.get_setting("application/config/version") == "0.14.0", "packed version is 0.14.0")
+	_expect(ProjectSettings.get_setting("application/config/version") == "0.16.0", "packed version is 0.16.0")
 	_expect(store.dispatch({"type":"START"}).ok, "packed shift starts")
 	for case_id in Cases.ORDER:
 		if case_id == "finale":

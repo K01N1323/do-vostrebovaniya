@@ -64,7 +64,7 @@ func _play_melnikovs(recipient: String) -> bool:
 	await _click_caption("Бумаги Веры")
 	_expect(store.get_snapshot().read_documents.size() == 2 and "vera_claim" in store.get_snapshot().read_documents and "leonid_claim" not in store.get_snapshot().read_documents, "Vera papers do not silently read Leonid papers")
 	await _key(KEY_ESCAPE)
-	_expect(_find_button(ui,"Принять решение").disabled, "decision remains unavailable after only Vera documents")
+	_expect(not _find_button(ui,"Принять решение").disabled, "the player can decide after only Vera documents")
 	await _click_caption("Сверить все четыре бумаги")
 	_expect(store.get_snapshot().read_documents.size() == 4, "all four shared-case papers are read")
 	for id in ["vera_identity","vera_claim","leonid_identity","leonid_claim"]:
@@ -118,7 +118,7 @@ func _play_melnikovs(recipient: String) -> bool:
 	await _click_caption("Вернуть на полку · пока думаю")
 	_expect(store.get_snapshot().case_status == "active" and store.get_snapshot().package.location == "shelf" and store.get_snapshot().package.lining_lifted, "returning shared case to shelf does not resolve it")
 	await _click_caption("Принять решение")
-	_expect(_find_button(ui,"Выдать чемодан Вере Мельниковой").disabled and _find_button(ui,"Выдать чемодан Леониду Мельникову").disabled, "neither claimant can receive a shelf package directly")
+	_expect(not _find_button(ui,"Выдать чемодан Вере Мельниковой").disabled and not _find_button(ui,"Выдать чемодан Леониду Мельникову").disabled, "the transfer can start from the shelf")
 	await _click_caption("Пока не решать")
 	await _click_caption("Поставить на стол")
 	await _click_caption("Осмотреть содержимое")
@@ -134,6 +134,21 @@ func _play_melnikovs(recipient: String) -> bool:
 	await _capture(name_value + "-shared-decision")
 	var caption: String = {"vera":"Выдать чемодан Вере Мельниковой","leonid":"Выдать чемодан Леониду Мельникову","":"Завершить обращение · оставить на хранении"}[recipient]
 	await _click_caption(caption)
+	if not recipient.is_empty():
+		var hatch: Control = ui.find_child("HatchStage", true, false)
+		if not _expect(is_instance_valid(hatch), "case opens a manual transfer"):
+			return false
+		await _drag_tray(hatch, 0.63)
+		_expect(await _wait(func(): return hatch.message.contains("упёрся"), 2.0), "wide suitcase catches the frame")
+		await _capture(name_value + "-hatch-frame")
+		await _click_caption("Повернуть на 90°")
+		await _drag_tray(hatch, 0.63)
+		_expect(await _wait(func(): return hatch.caught, 2.0), "sideways suitcase catches its loose handle")
+		await _click_caption("Убрать ремешок")
+		await _drag_tray(hatch, 0.63)
+		_expect(await _wait(hatch.ready_to_deliver, 2.0), "the corrected suitcase can reach the far side")
+		await _capture(name_value + "-hatch-ready")
+		await _click_caption("Закончить передачу")
 	_expect(store.get_snapshot().recipient == recipient and store.get_snapshot().case_status == "resolved", "chosen recipient recorded: " + name_value)
 	_expect(is_instance_valid(_find_button(ui,"Следующий посетитель")), "next case is available after the shared case")
 	await _capture(name_value + "-shared-result")

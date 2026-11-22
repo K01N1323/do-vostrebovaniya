@@ -61,25 +61,22 @@ func _run() -> void:
 				state = _apply(state, {"type":"INSPECT_DETAIL","detail_id":"green_stain"})
 				for id in ["vera_identity", "vera_claim"]:
 					state = _apply(state, {"type":"READ_DOCUMENT","document_id":id})
-				_expect(not Rules.can_decide(state), "one claimant's papers cannot complete verification")
+				_expect(not Rules.finished_checking(state), "one claimant's papers cannot complete verification")
 				state = _apply(state, {"type":"LIFT_LINING"})
 				_reject(state, {"type":"LIFT_LINING"})
 				state = _apply(state, {"type":"INSPECT_DETAIL","detail_id":"zipper"})
 				state = _apply(state, {"type":"ASK_TOPIC","topic_id":"lining_story"})
 				for id in ["leonid_identity", "leonid_claim"]:
 					state = _apply(state, {"type":"READ_DOCUMENT","document_id":id})
-				_expect(not Rules.can_decide(state), "guessing the code does not record Leonid's testimony")
+				_expect(not Rules.finished_checking(state), "guessing the code does not record Leonid's testimony")
 				state = _apply(state, {"type":"ASK_TOPIC","topic_id":"lock_code"})
-				_expect(Rules.can_decide(state), "both claimants' documents and evidence allow either recipient")
+				_expect(Rules.finished_checking(state), "both claimants' documents and evidence allow either recipient")
 				for foreign in ["nina", "fedor", "melnikovs", "unknown", null, ["vera", "leonid"]]:
 					_reject(state, {"type":"ISSUE_PACKAGE","recipient":foreign})
 				_reject(state, {"type":"APPROPRIATE_PACKAGE"})
 				state = _apply(state, {"type":"MOVE_PACKAGE","destination":"shelf"})
 				_expect(state.case_status == "active" and state.package.lining_lifted, "thinking preserves lining knowledge and active status")
-				_reject(state, {"type":"ISSUE_PACKAGE","recipient":"vera"})
-				_reject(state, {"type":"ISSUE_PACKAGE","recipient":"leonid"})
 				if not recipient.is_empty():
-					state = _apply(state, {"type":"MOVE_PACKAGE","destination":"desk"})
 					state = _apply(state, {"type":"ISSUE_PACKAGE","recipient":recipient})
 				else:
 					state = _apply(state, {"type":"RETAIN_PACKAGE"})

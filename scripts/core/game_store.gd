@@ -91,7 +91,7 @@ func dispatch(command: Dictionary) -> Dictionary:
 	var result: Dictionary = Reducer.apply_command(_state, command)
 	if result.ok:
 		var changed: bool = _state != result.state
-		if command.type in ["RESTART", "NEXT_CASE"]:
+		if command.type in ["RESTART", "NEXT_CASE", "DEFER_GLEB"]:
 			_resume_view.clear()
 		if changed:
 			_set_state(result.state)

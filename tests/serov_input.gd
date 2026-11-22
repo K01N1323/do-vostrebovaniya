@@ -48,12 +48,17 @@ func _version() -> String:
 
 func _play_serov(decision: String) -> bool:
 	var previous := Rules.all_packages(store.get_snapshot())
-	await _click_caption("Следующий посетитель")
+	var deferred: bool = store.get_snapshot().has("deferred_gleb")
+	if not deferred:
+		await _click_caption("Следующий посетитель")
 	if not _expect(await _wait(func(): return room.visitor_phase == "waiting", 3.0), "Serov arrives after Gleb"):
 		return false
 	_expect(store.get_snapshot().case_id == "serov" and ui._modal_kind == "dialogue", "Serov has his own arrival")
-	var camera_outcome: String = store.get_snapshot().completed_cases.gleb.decision
-	_expect(ui.dialogue_text.text == store.content.camera_followup[camera_outcome], "Orlov's call reflects what happened to the camera")
+	if deferred:
+		_expect(ui.dialogue_text.text.begins_with("Серов"), "Serov reaches the window before the deferred caller is answered")
+	else:
+		var camera_outcome: String = store.get_snapshot().completed_cases.gleb.decision
+		_expect(ui.dialogue_text.text == store.content.camera_followup[camera_outcome], "Orlov's call reflects what happened to the camera")
 	await _capture(decision + "-serov-arrival")
 	await _finish_reply()
 	_expect(ui.dialogue_text.text.contains("помнит"), "Pavel recognizes Serov and remembers the act")
@@ -68,6 +73,15 @@ func _play_serov(decision: String) -> bool:
 	await _finish_reply()
 	await _key(KEY_ESCAPE)
 	_expect("past" in store.get_snapshot().asked_topics and "trip" in store.get_snapshot().asked_topics, "two story topics heard before the decision")
+	if deferred:
+		await _click_caption("Снять трубку")
+		_expect(ui._modal_kind == "camera_call", "the player can interrupt the coat case for the optional call")
+		await _capture("deferred-camera-call")
+		await _click_caption("Вернуться к Серову")
+		await _click_caption("Дело Глеба · камера")
+		await _click_caption("Убрать камеру под стол")
+		_expect(store.get_snapshot().completed_cases.gleb.decision == "appropriate", "the deferred camera has a deliberate outcome")
+		previous = Rules.all_packages(store.get_snapshot())
 	await _click_caption("Сравнить обе бумаги")
 	await _capture(decision + "-serov-papers")
 	await _key(KEY_ESCAPE)

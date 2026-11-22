@@ -2,7 +2,7 @@ extends Node
 ## Original procedural station sounds. The title menu stays silent.
 
 const SAMPLE_RATE := 22050
-const DURATIONS := {"hall": 2.0, "steps": 1.1, "paper": 0.26, "latch": 0.24, "stamp": 0.23, "boarding": 1.40}
+const DURATIONS := {"hall": 2.0, "steps": 1.1, "paper": 0.26, "latch": 0.24, "stamp": 0.23, "boarding": 1.40, "phone": 1.15}
 const SCORE = preload("res://assets/audio/last-shift.wav")
 const VOICES := {
 	"nina":1.29, "fedor":0.86, "vera":1.42, "leonid":1.08,
@@ -154,6 +154,9 @@ func _make_stream(id: String) -> AudioStreamWAV:
 				sample = _pulse(t, 28.0) * (0.62 * sin(TAU * 96 * t) + 0.22 * white)
 			"boarding":
 				sample = 0.26 * _pulse(t, 4.0) * sin(TAU * 422 * t) + 0.22 * _pulse(t - 0.40, 4.1) * sin(TAU * 335 * t)
+			"phone":
+				var ring := _pulse(t, 4.5) + _pulse(t - 0.48, 4.5)
+				sample = 0.34 * ring * (sin(TAU * 740 * t) + 0.5 * sin(TAU * 1180 * t))
 		data.encode_s16(i * 2, int(clampf(sample, -1.0, 1.0) * 32767.0))
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS

@@ -60,12 +60,20 @@ func _run() -> void:
 
 func _play_case(decision: String) -> bool:
 	await _click_caption("Начать смену")
+	if not _expect(await _wait(func(): return ui._modal_kind == "briefing", 2.0), decision + ": new player sees the handover before the greeting"):
+		return false
+	_expect(not ui.get("_task_panel").visible and not room.input_enabled, "briefing protects the opening note from world clicks")
+	await _capture(decision + "-briefing")
+	await _click_caption("К окну бюро")
 	if not await _wait(func(): return store.get_snapshot().started and room.visitor_phase == "waiting", 4.0):
 		_expect(false, decision + ": mouse starts shift and visitor arrives; state=%s phase=%s" % [store.get_snapshot(), room.visitor_phase])
 		await _capture(decision + "-start-failed")
 		return false
 	_expect(ui._modal_kind == "dialogue", decision + ": arrival conversation is visible")
 	await _key(KEY_ESCAPE)
+	_expect(ui.get("_task_panel").visible and ui.objective.text == "Сверьте бумаги", "closing the greeting shows the first role-specific action")
+	var task_button: Button = ui.find_child("ShiftTaskAction", true, false)
+	_expect(task_button.size.x > 140 and task_button.size.y < 70, "primary action has a readable single row")
 	await _key(KEY_3)
 	await _settle()
 	_expect(rig.current_view == "desk", "3 selects desk through keyboard input")
@@ -95,19 +103,28 @@ func _play_case(decision: String) -> bool:
 	_expect(rig.current_view == old_view and store.get_snapshot() == before, "document blocks navigation and underlying world clicks")
 	await _key(KEY_ESCAPE)
 	_expect(not is_instance_valid(ui.modal), "Escape closes document")
-	await _click_caption("Сравнить обе бумаги")
+	await _capture(decision + "-task-papers")
+	await _click_caption("Разложить бумаги рядом" if decision == "issue" else "Сравнить обе бумаги")
 	_expect(ui._modal_kind == "comparison" and store.get_snapshot().read_documents.size() == 2, "mouse comparison records both documents")
 	await _capture(decision + "-papers")
 	await _key(KEY_ESCAPE)
-	await _key(KEY_2)
-	await _settle()
 	var package_target := room.get_node("Package/Target_P01") as Node3D
-	await _click_world(package_target.global_position, decision + "-shelf-hover")
-	if not _expect(store.get_snapshot().package.location == "desk", decision + ": shelf package moves by 3D click"):
+	_expect(ui.objective.text == "Возьмите переноску", "reading both papers suggests moving the relevant find")
+	if decision == "issue":
+		await _click_caption("Перенести на стол")
+	else:
+		await _key(KEY_2)
+		await _settle()
+		await _click_world(package_target.global_position, decision + "-shelf-hover")
+	if not _expect(store.get_snapshot().package.location == "desk", decision + ": shelf package moves to the desk"):
 		return false
+	_expect(ui.objective.text == "Осмотрите переноску", "the find on the desk leads into inspection")
 	await _settle()
-	await _click_world(package_target.global_position)
-	if not _expect(ui._modal_kind == "inspection", decision + ": desk package opens inspection by 3D click"):
+	if decision == "issue":
+		await _click_caption("Начать осмотр")
+	else:
+		await _click_world(package_target.global_position)
+	if not _expect(ui._modal_kind == "inspection", decision + ": desk package opens inspection"):
 		return false
 	var stage: Node3D = ui.get("_inspection")
 	await _key(KEY_F1)
@@ -156,6 +173,7 @@ func _play_case(decision: String) -> bool:
 	_expect(stage.get_zoom_step() == 1 and stage.get_focus_id() == "napkin", "zoom also works in a close-up")
 	await _click_caption("Отметить наблюдение")
 	_expect("napkin" in store.get_snapshot().inspected_details, "recording the focused patch stores its evidence")
+	_expect(ui.get("_observation_text").text.contains("Для решения этого достаточно"), "inspection explains when the first decision is available")
 	await _capture(decision + "-close-up")
 	await _click_caption("Вся переноска")
 	await _settle()
@@ -167,6 +185,7 @@ func _play_case(decision: String) -> bool:
 	_expect("sandwiches" in store.get_snapshot().inspected_details, "alternate view can be recorded")
 	await _key(KEY_ESCAPE)
 	_expect(not is_instance_valid(ui.modal), "Escape closes inspection")
+	_expect(ui.objective.text == "Решите судьбу находки", "the first observation opens the decision task")
 	if decision == "issue":
 		await _key(KEY_1)
 		await _settle()
@@ -197,9 +216,11 @@ func _play_case(decision: String) -> bool:
 	_expect(not panel.visible, "F1 hides actions")
 	await _key(KEY_F1)
 	_expect(panel.visible, "F1 restores actions")
-	await _click_caption("Принять решение")
+	await _click_caption("Выбрать исход" if decision == "issue" else "Принять решение")
 	var caption: String = {"issue": "Выдать переноску Нине Лукиной", "retain": "Завершить обращение · оставить на хранении", "appropriate": "Убрать под стол · присвоить переноску"}[decision]
 	await _click_caption(caption)
+	if decision == "issue":
+		await _transfer_carrier()
 	if not _expect(store.get_snapshot().decision == decision, decision + ": mouse confirms chosen outcome"):
 		return false
 	var location: String = {"issue": "issued", "retain": "shelf", "appropriate": "personal"}[decision]
@@ -208,6 +229,44 @@ func _play_case(decision: String) -> bool:
 	await _key(KEY_ESCAPE)
 	_expect(await _wait(func(): return room.visitor_phase == "gone" and not room.transfer_active, 5.0), decision + ": visitor and handover finish")
 	return failures.is_empty()
+
+func _transfer_carrier() -> void:
+	var stage: Control = ui.find_child("HatchStage", true, false)
+	if not _expect(is_instance_valid(stage) and store.get_snapshot().case_status == "active", "carrier is in the interactive hatch before the commitment"):
+		return
+	for _step in range(7):
+		await _drag_tray(stage, 0.093)
+		await create_timer(0.37).timeout
+	if not _expect(await _wait(stage.ready_to_deliver, 2.0), "mouse pushes the tray all the way through the carrier track"):
+		return
+	_expect(not stage.jolted, "a sequence of small pushes keeps the saucer steady")
+	await _capture("carrier-hatch")
+	await _click_caption("Подписать и передать")
+
+func _drag_tray(stage: Control, portion: float) -> void:
+	var rect := stage.get_global_rect()
+	var point := rect.position + rect.size * Vector2(0.5, 0.79)
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.button_mask = MOUSE_BUTTON_MASK_LEFT
+	press.pressed = true
+	press.position = point
+	press.global_position = point
+	root.push_input(press, true)
+	await process_frame
+	var drag := InputEventMouseMotion.new()
+	drag.relative = Vector2(0, -rect.size.y * portion)
+	drag.position = point + drag.relative
+	drag.global_position = drag.position
+	drag.button_mask = MOUSE_BUTTON_MASK_LEFT
+	root.push_input(drag, true)
+	await process_frame
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.position = drag.position
+	release.global_position = drag.position
+	root.push_input(release, true)
+	await process_frame
 
 
 func _click_caption(caption: String) -> void:

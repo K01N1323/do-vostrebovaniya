@@ -36,40 +36,37 @@ static func apply_command(state: Dictionary, command: Dictionary) -> Dictionary:
 		var reading := state.duplicate(true)
 		reading.old_act_read = true
 		return _accept(reading)
+	if kind == "CLOSE_SHIFT":
+		if state.case_id != "finale" or state.case_status != "resolved" or state.get("shift_closed", false):
+			return _reject(state, "Закрыть бюро можно после решения о карточке.")
+		var closed := state.duplicate(true)
+		closed.shift_closed = true
+		return _accept(closed)
 	if command.has("package_id"):
 		if kind in ITEM_ACTIONS:
 			return _apply_auxiliary_find(state, command)
 		return _reject(state, "Находка без заявителя доступна только для осмотра и хранения.")
+	if kind == "DEFER_GLEB":
+		if state.case_id != "gleb" or state.case_status != "active":
+			return _reject(state, "Отложить можно только открытое обращение Глеба.")
+		var deferred := _case_record(state)
+		deferred.package.location = "shelf"
+		var advanced := _advance_case(state)
+		advanced.deferred_gleb = deferred
+		return _accept(advanced)
+	if kind == "HEAR_ORLOV" or kind == "RESOLVE_DEFERRED_GLEB":
+		return _update_deferred_gleb(state, command)
 	if kind == "NEXT_CASE":
 		if state.case_status != "resolved":
 			return _reject(state, "Сначала завершите текущее обращение.")
 		if state.case_id == "serov" and not state.old_act_read:
 			return _reject(state, "Прочитайте акт 2014 года в архивной папке.")
+		if state.has("deferred_gleb"):
+			return _reject(state, "Закройте отложенное обращение по камере.")
 		if not Cases.has_next(state.case_id):
 			return _reject(state, "Этот фрагмент смены завершён.")
-		var advanced: Dictionary = initial_state()
-		advanced.started = true
-		advanced.completed_cases = state.completed_cases.duplicate(true)
-		var record: Dictionary = state.duplicate(true)
-		record.erase("completed_cases")
-		record.erase("loose_finds")
-		record.erase("preview_finds")
-		record.erase("old_act_read")
-		record.erase("card_location")
-		advanced.loose_finds = state.loose_finds.duplicate(true)
-		advanced.preview_finds = state.get("preview_finds", {}).duplicate(true)
-		advanced.old_act_read = state.old_act_read
-		advanced.completed_cases[state.case_id] = record
-		advanced.case_id = Cases.ORDER[Cases.ORDER.find(state.case_id) + 1]
-		advanced.package = Cases.initial_package(advanced.case_id)
-		var preview: Dictionary = advanced.preview_finds.get(advanced.package.id, {})
-		if not preview.is_empty():
-			advanced.preview_finds.erase(preview.id)
-			advanced.inspected_details = preview.inspected_details
-			preview.erase("inspected_details")
-			advanced.package = preview
-		if advanced.case_id == "finale":
-			advanced.card_location = "bag"
+		var advanced := _advance_case(state)
+		advanced.completed_cases[state.case_id] = _case_record(state)
 		return _accept(advanced)
 	if state.case_status != "active":
 		return _reject(state, "Обращение уже завершено.")
@@ -129,13 +126,14 @@ static func apply_command(state: Dictionary, command: Dictionary) -> Dictionary:
 				return _reject(state, "Решение по сумке принимается вместе с решением о карточке.")
 			if kind == "APPROPRIATE_PACKAGE" and not definition.allow_appropriate:
 				return _reject(state, "В этом обращении выберите получателя или хранение.")
-			if not can_decide(state):
-				return _reject(state, "Сверьте документы и проверяемые признаки обращения.")
-			if kind != "RETAIN_PACKAGE" and next.package.location != "desk":
-				return _reject(state, "Сначала поставьте вещь на стол.")
 			if kind == "ISSUE_PACKAGE":
 				if command.get("recipient") not in definition.recipients:
 					return _reject(state, "Для выдачи укажите заявителя текущего обращения.")
+				var handling: Variant = command.get("handling", "")
+				if handling not in ["", "steady", "jolted"] or (handling != "" and state.case_id not in ["nina", "melnikovs"]) or (handling == "jolted" and state.case_id != "nina"):
+					return _reject(state, "Неизвестное состояние переноски.")
+				if handling != "":
+					next.handling = handling
 				next.package.location = "issued"
 				next.decision = "issue"
 				next.recipient = command.recipient
@@ -149,6 +147,55 @@ static func apply_command(state: Dictionary, command: Dictionary) -> Dictionary:
 			next.dialogue_id = "reaction"
 		_:
 			return _reject(state, "Неизвестное действие.")
+	return _accept(next)
+
+static func _case_record(state: Dictionary) -> Dictionary:
+	var record := state.duplicate(true)
+	for key in ["completed_cases", "loose_finds", "preview_finds", "old_act_read", "card_location", "deferred_gleb", "orlov_heard"]:
+		record.erase(key)
+	return record
+
+static func _advance_case(state: Dictionary) -> Dictionary:
+	var advanced := initial_state()
+	advanced.started = true
+	advanced.completed_cases = state.completed_cases.duplicate(true)
+	advanced.loose_finds = state.loose_finds.duplicate(true)
+	advanced.preview_finds = state.get("preview_finds", {}).duplicate(true)
+	advanced.old_act_read = state.old_act_read
+	advanced.case_id = Cases.ORDER[Cases.ORDER.find(state.case_id) + 1]
+	advanced.package = Cases.initial_package(advanced.case_id)
+	var preview: Dictionary = advanced.preview_finds.get(advanced.package.id, {})
+	if not preview.is_empty():
+		advanced.preview_finds.erase(preview.id)
+		advanced.inspected_details = preview.inspected_details
+		preview.erase("inspected_details")
+		advanced.package = preview
+	if advanced.case_id == "finale":
+		advanced.card_location = "bag"
+	return advanced
+
+static func _update_deferred_gleb(state: Dictionary, command: Dictionary) -> Dictionary:
+	if state.case_id != "serov" or not state.has("deferred_gleb"):
+		return _reject(state, "Отложенного обращения по камере нет.")
+	var next := state.duplicate(true)
+	if command.type == "HEAR_ORLOV":
+		next.orlov_heard = true
+		return _accept(next)
+	if not state.get("orlov_heard", false):
+		return _reject(state, "Сначала ответьте на звонок Орлова.")
+	var decision: Variant = command.get("decision")
+	if decision not in ["issue", "retain", "appropriate"]:
+		return _reject(state, "Выберите судьбу камеры.")
+	var record: Dictionary = next.deferred_gleb
+	record.decision = decision
+	record.recipient = "gleb" if decision == "issue" else ""
+	record.case_status = "resolved"
+	record.dialogue_id = "reaction"
+	record.after_orlov_call = true
+	record.package.location = {"issue":"issued", "retain":"shelf", "appropriate":"personal"}[decision]
+	next.completed_cases.gleb = record
+	next.erase("deferred_gleb")
+	next.erase("orlov_heard")
 	return _accept(next)
 
 static func _apply_item_action(item: Dictionary, inspected: Array, definition: Dictionary, command: Dictionary, desk_occupied: bool) -> String:
@@ -208,13 +255,18 @@ static func _apply_auxiliary_find(state: Dictionary, command: Dictionary) -> Dic
 		return _reject(state, "Эта находка сейчас недоступна для отдельного осмотра.")
 	item = item.duplicate(true)
 	var loose := Cases.LOOSE_FINDS.has(id)
-	var definition := {"details":Cases.LOOSE_FINDS[id]} if loose else Cases.get_case(Cases.future_case(state.case_id, id))
+	var deferred: bool = id == "P04" and state.has("deferred_gleb")
+	var definition := {"details":Cases.LOOSE_FINDS[id]} if loose else Cases.get_case("gleb" if deferred else Cases.future_case(state.case_id, id))
 	var error := _apply_item_action(item, item.inspected_details, definition, command, not desk_package_id(state).is_empty())
 	if not error.is_empty():
 		return _reject(state, error)
 	var next := state.duplicate(true)
 	if loose:
 		next.loose_finds[id] = item
+	elif deferred:
+		next.deferred_gleb.inspected_details = item.inspected_details
+		item.erase("inspected_details")
+		next.deferred_gleb.package = item
 	else:
 		if not next.has("preview_finds"):
 			next.preview_finds = {}
@@ -224,6 +276,10 @@ static func _apply_auxiliary_find(state: Dictionary, command: Dictionary) -> Dic
 static func auxiliary_item(state: Dictionary, id: String) -> Dictionary:
 	if state.loose_finds.has(id):
 		return state.loose_finds[id]
+	if id == "P04" and state.has("deferred_gleb"):
+		var deferred: Dictionary = state.deferred_gleb.package.duplicate(true)
+		deferred.inspected_details = state.deferred_gleb.inspected_details.duplicate()
+		return deferred
 	var future := Cases.future_case(state.case_id, id)
 	if future.is_empty():
 		return {}
@@ -235,6 +291,8 @@ static func auxiliary_item(state: Dictionary, id: String) -> Dictionary:
 
 static func auxiliary_packages(state: Dictionary) -> Dictionary:
 	var result: Dictionary = state.loose_finds.duplicate()
+	if state.has("deferred_gleb"):
+		result.P04 = auxiliary_item(state, "P04")
 	for id in Cases.ORDER.slice(Cases.ORDER.find(state.case_id) + 1):
 		if id == "finale":
 			continue
@@ -254,9 +312,14 @@ static func serov_waits_for_bus(state: Dictionary) -> bool:
 	return (state.case_id == "serov" and state.case_status == "resolved") or state.completed_cases.has("serov")
 
 static func can_decide(state: Dictionary) -> bool:
-	if not state.started or state.case_status != "active" or not state.package.opened or state.inspected_details.is_empty():
+	if not state.started or state.case_status != "active":
 		return false
-	if state.case_id == "finale" and (not state.old_act_read or state.package.location != "desk"):
+	if state.case_id != "finale":
+		return true
+	return state.old_act_read and state.package.location == "desk" and finished_checking(state)
+
+static func finished_checking(state: Dictionary) -> bool:
+	if not state.package.opened or state.inspected_details.is_empty():
 		return false
 	var definition: Dictionary = Cases.get_case(state.case_id)
 	for id in definition.documents:
@@ -266,6 +329,8 @@ static func can_decide(state: Dictionary) -> bool:
 		if id not in state.inspected_details:
 			return false
 	for id in definition.get("required_topics", []):
+		if state.case_id == "melnikovs" and id == "lock_code" and "leonid_alone" in state.asked_topics:
+			continue
 		if id not in state.asked_topics:
 			return false
 	return true
@@ -295,15 +360,27 @@ static func is_valid_snapshot(state: Dictionary) -> bool:
 	if not state.get("case_id") is String or not state.get("completed_cases") is Dictionary or not state.get("loose_finds") is Dictionary:
 		return false
 	var index := Cases.ORDER.find(state.case_id)
-	if index < 0 or state.completed_cases.size() != index or not _valid_case_record(state, state.case_id):
+	var deferred: Variant = state.get("deferred_gleb")
+	if state.has("deferred_gleb"):
+		if state.case_id != "serov" or not deferred is Dictionary or not _valid_case_record(deferred, "gleb"):
+			return false
+		if deferred.case_status != "active" or not state.get("orlov_heard", false) is bool:
+			return false
+	elif state.has("orlov_heard"):
+		return false
+	if index < 0 or state.completed_cases.size() != index - int(deferred != null) or not _valid_case_record(state, state.case_id):
 		return false
 	for prior in Cases.ORDER.slice(0, index):
+		if prior == "gleb" and deferred != null:
+			continue
 		var record: Variant = state.completed_cases.get(prior)
 		if not record is Dictionary or record.get("case_status") != "resolved" or not _valid_case_record(record, prior):
 			return false
 	if state.loose_finds.size() != Cases.LOOSE_FINDS.size():
 		return false
 	var desk_items: int = int(state.package.location == "desk")
+	if deferred != null:
+		desk_items += int(deferred.package.location == "desk")
 	for id in Cases.LOOSE_FINDS:
 		var item: Variant = state.loose_finds.get(id)
 		if not item is Dictionary or item.get("id") != id or item.get("location") not in ["desk", "shelf"] or not item.get("opened") is bool:
@@ -327,7 +404,9 @@ static func is_valid_snapshot(state: Dictionary) -> bool:
 	if desk_items > 1:
 		return false
 	if state.case_id != "finale":
-		return state.get("card_location") == ""
+		return state.get("card_location") == "" and not state.has("shift_closed")
+	if state.has("shift_closed") and (state.shift_closed != true or state.case_status != "resolved"):
+		return false
 	if not state.old_act_read:
 		return false
 	var card: Variant = state.get("card_location")
@@ -354,18 +433,16 @@ static func _valid_case_record(record: Dictionary, case_id: String) -> bool:
 	var recipient: Variant = record.get("recipient")
 	if not decision is String or not recipient is String or status not in ["active", "resolved"]:
 		return false
+	if record.has("after_orlov_call") and (case_id != "gleb" or status != "resolved" or record.after_orlov_call != true):
+		return false
+	if record.has("handling") and (case_id not in ["nina", "melnikovs"] or decision != "issue" or record.handling not in ["steady", "jolted"] or (record.handling == "jolted" and case_id != "nina")):
+		return false
 	if status == "active":
 		return decision.is_empty() and recipient.is_empty() and item.get("location") in ["desk", "shelf"] and (record.get("dialogue_id") == "greeting" or record.get("dialogue_id") in record.asked_topics)
-	if record.get("dialogue_id") != "reaction" or not item.opened or record.inspected_details.is_empty() or record.read_documents.size() != definition.documents.size():
+	if record.get("dialogue_id") != "reaction":
 		return false
-	for detail in definition.get("required_details", []):
-		if detail not in record.inspected_details:
-			return false
-	for topic in definition.get("required_topics", []):
-		if topic not in record.asked_topics:
-			return false
 	if case_id == "finale":
-		return decision in Cases.ENDINGS and recipient.is_empty() and item.get("location") == ("personal" if decision == "keep" else "shelf")
+		return finished_checking(record) and decision in Cases.ENDINGS and recipient.is_empty() and item.get("location") == ("personal" if decision == "keep" else "shelf")
 	match decision:
 		"issue":
 			return recipient in definition.recipients and item.get("location") == "issued"

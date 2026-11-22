@@ -41,7 +41,7 @@ func _run() -> void:
 	print("%s: %d viewport checks through four cases and all three Gleb outcomes." % ["PASS" if failures.is_empty() else "FAIL",checks])
 	quit(0 if failures.is_empty() else 1)
 
-func _play_gleb(decision: String) -> bool:
+func _play_gleb(decision: String, defer_case: bool = false) -> bool:
 	var prior: Dictionary = Rules.all_packages(store.get_snapshot())
 	var history: Dictionary = store.get_snapshot().completed_cases.duplicate(true)
 	await _click_caption("Следующий посетитель")
@@ -67,7 +67,7 @@ func _play_gleb(decision: String) -> bool:
 		_expect(text.size.y >= 135 and text.get_visible_line_count() >= 5, "paper exposes name and identifying description without scrolling: " + id)
 	await _capture(decision + "-gleb-papers")
 	await _key(KEY_ESCAPE)
-	_expect(_find_button(ui,"Принять решение").disabled, "papers alone cannot bypass inspecting the bag")
+	_expect(not _find_button(ui,"Принять решение").disabled, "the player may take the risk after only reading the papers")
 	await _key(KEY_2)
 	await _settle()
 	var target := room.find_child("Target_P04",true,false) as Node3D
@@ -105,13 +105,17 @@ func _play_gleb(decision: String) -> bool:
 	await _click_caption("Вернуть на полку · пока думаю")
 	_expect(store.get_snapshot().case_status == "active" and store.get_snapshot().inspected_details.size() == 3, "shelf move preserves active status and evidence")
 	await _click_caption("Принять решение")
-	_expect(_find_button(ui,"Выдать сумку Глебу Корнееву").disabled and _find_button(ui,"Убрать под стол · присвоить сумку").disabled, "bag cannot be issued or taken directly from shelf")
+	_expect(not _find_button(ui,"Выдать сумку Глебу Корнееву").disabled and not _find_button(ui,"Убрать под стол · присвоить сумку").disabled, "choices remain available with the bag on the shelf")
 	await _click_caption("Пока не решать")
 	if decision != "retain":
 		await _click_caption("Поставить на стол")
 	await _click_caption("Принять решение")
 	await _settle()
 	await _capture(decision + "-gleb-decision")
+	if defer_case:
+		await _click_caption("Отложить · принять Серова")
+		var deferred: Dictionary = store.get_snapshot()
+		return _expect(deferred.case_id == "serov" and deferred.deferred_gleb.inspected_details.size() == 3, "deferring the camera brings Serov without losing evidence")
 	var captions := {"issue":"Выдать сумку Глебу Корнееву", "retain":"Завершить обращение · оставить на хранении", "appropriate":"Убрать под стол · присвоить сумку"}
 	await _click_caption(captions[decision])
 	_expect(store.get_snapshot().decision == decision and store.get_snapshot().case_status == "resolved", "Gleb outcome " + decision + " remains a deliberate possible action")

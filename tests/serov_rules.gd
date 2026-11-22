@@ -42,7 +42,7 @@ func _check_future_finds() -> void:
 		state = _apply(state, {"type":"RETAIN_PACKAGE"})
 		state = _apply(state, {"type":"NEXT_CASE"})
 	_expect(state.package.id == "P03" and state.package.lining_lifted and state.inspected_details == ["zipper"], "early lock and evidence carry into the correct claim")
-	_expect(not state.preview_finds.has("P03") and not Rules.can_decide(state), "preview becomes one active item and cannot skip the claim")
+	_expect(not state.preview_finds.has("P03") and not Rules.finished_checking(state), "preview becomes one active item and cannot skip the claim")
 	_expect(Rules.is_valid_snapshot(state), "promoted state remains valid for saves")
 
 func _ready_case(state: Dictionary, detail: String) -> Dictionary:
@@ -59,13 +59,13 @@ func _check_coat(state: Dictionary) -> void:
 	var packages := Rules.all_packages(state)
 	state = _ready_case(state, "coat_tag")
 	state = _apply(state, {"type":"ASK_TOPIC", "topic_id":"tag"})
-	_expect(not Rules.can_decide(state), "a label alone does not establish ownership")
+	_expect(not Rules.finished_checking(state), "a label alone does not establish ownership")
 	for id in ["coat_pockets", "coat_cuff", "coat_reversed"]:
 		state = _apply(state, {"type":"INSPECT_DETAIL", "detail_id":id})
-	_expect(not Rules.can_decide(state), "the past and trip remain unheard")
+	_expect(not Rules.finished_checking(state), "the past and trip remain unheard")
 	for id in ["past", "trip"]:
 		state = _apply(state, {"type":"ASK_TOPIC", "topic_id":id})
-	_expect(Rules.can_decide(state), "verified coat is ready for all decisions")
+	_expect(Rules.finished_checking(state), "verified coat is ready for all decisions")
 	_reject(state, {"type":"ISSUE_PACKAGE", "recipient":"gleb"})
 	for choice in CHOICES:
 		var resolved := _apply(state, {"type":choice, "recipient":"serov"})

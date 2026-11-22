@@ -73,12 +73,6 @@ func _ready(detail_id: String = "sandwiches") -> Dictionary:
 	return _accept(state, {"type": "INSPECT_DETAIL", "detail_id": detail_id}, "inspect " + detail_id)
 
 
-func _reject_all_decisions(state: Dictionary, label: String) -> void:
-	_reject(state, {"type": "ISSUE_PACKAGE", "recipient": "nina"}, label + ": issue")
-	_reject(state, {"type": "RETAIN_PACKAGE"}, label + ": retain")
-	_reject(state, {"type": "APPROPRIATE_PACKAGE"}, label + ": appropriate")
-
-
 func _test_initial_state_and_start() -> void:
 	var initial: Dictionary = Reducer.initial_state()
 	_expect(initial.get("version") == 1, "initial: schema version")
@@ -154,26 +148,15 @@ func _test_package_and_knowledge_rules() -> void:
 
 func _test_decision_prerequisites() -> void:
 	var state := _started()
-	_reject_all_decisions(state, "no evidence")
-	state = _accept(state, {"type": "MOVE_PACKAGE", "destination": "desk"}, "prerequisites: desk")
-	state = _accept(state, {"type": "READ_DOCUMENT", "document_id": "identity"}, "prerequisites: identity")
-	state = _accept(state, {"type": "READ_DOCUMENT", "document_id": "claim"}, "prerequisites: claim")
-	_reject_all_decisions(state, "package unopened")
-	state = _accept(state, {"type": "OPEN_PACKAGE"}, "prerequisites: open")
-	_reject_all_decisions(state, "no inspected detail")
-	for missing_id in ["identity", "claim"]:
-		var partial := _started()
-		partial = _accept(partial, {"type": "READ_DOCUMENT", "document_id": "claim" if missing_id == "identity" else "identity"}, "one paper read")
-		partial = _accept(partial, {"type": "MOVE_PACKAGE", "destination": "desk"}, "missing paper: desk")
-		partial = _accept(partial, {"type": "OPEN_PACKAGE"}, "missing paper: open")
-		partial = _accept(partial, {"type": "INSPECT_DETAIL", "detail_id": "saucer"}, "missing paper: inspected detail")
-		_reject_all_decisions(partial, "missing " + missing_id)
-	var shelf := _ready("napkin")
-	shelf = _accept(shelf, {"type": "MOVE_PACKAGE", "destination": "shelf"}, "ready package to shelf")
-	_expect(shelf["case_status"] == "active", "fully examined package on shelf remains active")
-	_reject(shelf, {"type": "ISSUE_PACKAGE", "recipient": "nina"}, "issue requires desk")
-	_reject(shelf, {"type": "APPROPRIATE_PACKAGE"}, "appropriation requires desk")
-
+	_expect(Reducer.can_decide(state) and not Reducer.finished_checking(state), "the first visitor can be served from the shelf without evidence")
+	for outcome in [
+		[{"type":"ISSUE_PACKAGE", "recipient":"nina"}, "issued"],
+		[{"type":"RETAIN_PACKAGE"}, "shelf"],
+		[{"type":"APPROPRIATE_PACKAGE"}, "personal"],
+	]:
+		var decided := _accept(state, outcome[0], "early decision")
+		_expect(decided.package.location == outcome[1] and Reducer.is_valid_snapshot(decided), "early decision has one valid location")
+	_expect(state.package.location == "shelf" and state.read_documents.is_empty(), "other early decision branches cannot mutate the original state")
 
 func _check_resolved(state: Dictionary, decision: String, location: String) -> void:
 	_expect(state["decision"] == decision, decision + ": decision recorded")

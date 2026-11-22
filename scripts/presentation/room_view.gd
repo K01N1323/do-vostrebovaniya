@@ -111,7 +111,8 @@ func apply_snapshot(snapshot: Dictionary, restored: bool = false) -> void:
 		_package.rotation = Vector3.ZERO
 		_set_visitor_phase("absent")
 		_configure_visitor(snapshot.case_id)
-	_render_inactive_packages()
+	if restarted or changed_case or not had_previous or restored or previous.has("deferred_gleb") != snapshot.has("deferred_gleb"):
+		_render_inactive_packages()
 	if not started:
 		_cancel_animations()
 		_set_visitor_phase("absent")
@@ -121,8 +122,8 @@ func apply_snapshot(snapshot: Dictionary, restored: bool = false) -> void:
 		_set_visitor_phase("at_bus" if at_bus else ("gone" if status == "resolved" else "waiting"))
 	elif (not previous_started and started) or changed_case:
 		_start_arrival()
-	if location == "issued" and had_previous and previous_location == "desk" and not restarted and not changed_case and not restored:
-		_start_handover()
+	if location == "issued" and had_previous and previous_location in ["desk", "shelf"] and not restarted and not changed_case and not restored:
+		_start_handover(snapshot.has("handling"))
 	elif not transfer_active:
 		_package.visible = location != "issued" and not (snapshot.case_id == "finale" and visitor_phase == "arriving")
 		if PACKAGE_POSITIONS.has(location):
@@ -133,6 +134,7 @@ func apply_snapshot(snapshot: Dictionary, restored: bool = false) -> void:
 		_set_package_picking(_package.visible and (snapshot.case_id != "finale" or snapshot.card_location == "bag"))
 	_render_auxiliary_finds()
 	_sync_finale_props()
+	$WarmDeskLamp.visible = not snapshot.get("shift_closed", false)
 	if started and status == "resolved" and had_previous and previous_status != "resolved" and not restored:
 		if _snapshot.case_id == "finale":
 			_set_visitor_phase("gone")
@@ -385,7 +387,7 @@ func _start_departure() -> void:
 	_visitor_tween.tween_property(_visitor, "position", destination, 0.03 if reduced_motion else 1.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_visitor_tween.tween_callback(func(): _set_visitor_phase("at_bus" if waits else "gone"))
 
-func _start_handover() -> void:
+func _start_handover(already_inside: bool = false) -> void:
 	if transfer_active:
 		return
 	if is_instance_valid(_rotation_tween):
@@ -398,15 +400,20 @@ func _start_handover() -> void:
 	_close_hatch_now()
 	_transfer_tween = create_tween()
 	var speed := 0.06 if reduced_motion else 1.0
-	# A door is open from its first moving frame until it is completely closed.
-	_transfer_tween.tween_callback(func():
-		_inner_open = true
-		sound_requested.emit("latch"))
-	_transfer_tween.tween_property(_inner_door, "position:y", 0.83, 0.14 * speed)
-	_transfer_tween.tween_property(_package, "position", Vector3(0.72, 0.94, 0.23), 0.28 * speed)
-	_transfer_tween.tween_property(_package, "position", PACKAGE_POSITIONS["hatch"], 0.30 * speed)
-	_transfer_tween.tween_property(_inner_door, "position:y", 0.0, 0.16 * speed)
-	_transfer_tween.tween_callback(func(): _inner_open = false)
+	if already_inside:
+		_package.position = PACKAGE_POSITIONS["hatch"]
+		if _snapshot.package.id == "P03":
+			_package.rotation.y = PI / 2.0
+	else:
+		# A door is open from its first moving frame until it is completely closed.
+		_transfer_tween.tween_callback(func():
+			_inner_open = true
+			sound_requested.emit("latch"))
+		_transfer_tween.tween_property(_inner_door, "position:y", 0.83, 0.14 * speed)
+		_transfer_tween.tween_property(_package, "position", Vector3(0.72, 0.94, 0.23), 0.28 * speed)
+		_transfer_tween.tween_property(_package, "position", PACKAGE_POSITIONS["hatch"], 0.30 * speed)
+		_transfer_tween.tween_property(_inner_door, "position:y", 0.0, 0.16 * speed)
+		_transfer_tween.tween_callback(func(): _inner_open = false)
 	_transfer_tween.tween_callback(func():
 		_outer_open = true
 		sound_requested.emit("latch"))

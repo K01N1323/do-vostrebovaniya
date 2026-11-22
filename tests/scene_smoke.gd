@@ -73,6 +73,9 @@ func _run() -> void:
 	_expect(arrived, "visitor arrives and waits at window")
 	await _frames()
 	_expect(not is_instance_valid(_ui.get("_start_screen")), "preparation screen closes")
+	_expect(_ui.get("_modal_kind") == "briefing" and not _room.get("input_enabled"), "briefing opens before greeting and blocks background clicks")
+	_ui.call("_close_modal")
+	await _frames()
 	_expect(_ui.get("_modal_kind") == "dialogue", "visitor arrival opens compact greeting")
 	await _test_conversation("arrival greeting", true)
 	await _test_visitor_audio_and_idle()
@@ -101,6 +104,16 @@ func _run() -> void:
 		var begin_ms := Time.get_ticks_msec()
 		var before_count := _handover_count
 		button.pressed.emit()
+		if decision == "issue":
+			var hatch: Control = _ui.find_child("HatchStage", true, false)
+			_expect(is_instance_valid(hatch), "the room opens a manual transfer before issuing")
+			hatch.nudge(1.0)
+			var cleared: bool = await _wait_until(hatch.ready_to_deliver, 2.4)
+			_expect(cleared and hatch.jolted, "a hard push jolts the saucer and still reaches the receiver")
+			var sign := _find_button(_ui.get("modal"), "Подписать и передать")
+			sign.pressed.emit()
+			begin_ms = Time.get_ticks_msec()
+			_expect(_snapshot().get("handling") == "jolted", "rough transfer is recorded")
 		_expect(_snapshot()["case_status"] == "resolved" and _snapshot()["decision"] == decision, decision + ": logical outcome is immediate")
 		await _frames()
 		_expect(_ui.get("_modal_kind") == "result", decision + ": compact reaction opens")
@@ -134,6 +147,7 @@ func _run() -> void:
 
 
 func _test_return_to_title() -> void:
+	_ui.call("_show_hint", "Сообщение из прежней смены")
 	_ui.call("_show_pause")
 	var back := _find_button(_ui.get("modal"), "В главное меню")
 	_expect(is_instance_valid(back), "pause exposes return to title")
@@ -144,6 +158,7 @@ func _test_return_to_title() -> void:
 	_expect(not _snapshot()["started"], "return to title resets logical shift")
 	_expect(is_instance_valid(_ui.get("_start_screen")), "title recreated")
 	_expect(not _ui.get("_hud").visible, "title hides gameplay HUD")
+	_expect(_ui.get("hint").text.begins_with("ПКМ"), "return to title resets hints from the old shift")
 	_expect(_room.get("visitor_phase") == "absent", "title removes visitor")
 	_expect(not _room.get("input_enabled") and not _rig.get("look_enabled"), "title blocks room and head controls")
 	_expect(not _ui.get("_sound").get("_running"), "title stops shift audio")

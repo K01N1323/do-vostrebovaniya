@@ -2,7 +2,10 @@ extends "res://tests/serov_input.gd"
 ## A complete graphical shift for each ending through the public UI.
 
 func _version() -> String:
-	return "0.14"
+	return "0.16"
+
+func _play_gleb(decision: String, defer_case: bool = false) -> bool:
+	return await super._play_gleb(decision, defer_case or decision == "appropriate")
 
 func _play_serov(decision: String) -> bool:
 	if not await super._play_serov(decision):
@@ -80,4 +83,8 @@ func _play_serov(decision: String) -> bool:
 		_expect(ui._modal_kind == "comparison" and ui.modal.find_child("Paper_supplement",true,false) != null, "signed supplement can be read beside the original records")
 		await _capture("archive-signed-supplement")
 		await _key(KEY_ESCAPE)
+	await _click_caption("Итоги смены")
+	var closing: String = {"keep":"Застегнуть сумку и погасить лампу", "archive":"Закрыть архив и погасить лампу", "serov":"Погасить лампу после отправления"}[ending]
+	await _click_caption(closing)
+	_expect(store.get_snapshot().get("shift_closed", false) and not room.get_node("WarmDeskLamp").visible, "the final action turns off the real desk lamp")
 	return failures.is_empty()

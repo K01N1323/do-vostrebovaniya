@@ -67,6 +67,8 @@ static func _read(path: String) -> Dictionary:
 		state.preview_finds = {}
 	for case_record in state.completed_cases.values():
 		case_record.version = int(case_record.version)
+	if state.has("deferred_gleb"):
+		state.deferred_gleb.version = int(state.deferred_gleb.version)
 	var view: Variant = record.get("view")
 	return {"state":state, "view":view if view is Dictionary and _valid_view(view, state) else {}, "recovered":false}
 
@@ -75,6 +77,15 @@ static func _valid_view(view: Dictionary, state: Dictionary) -> bool:
 	if not id is String:
 		return false
 	match view.get("kind", ""):
+		"briefing":
+			return state.case_id == "nina" and state.case_status == "active" and state.read_documents.is_empty()
+		"dialogue":
+			var line: Variant = view.get("line")
+			return state.case_status == "active" and view.get("arrival") is bool and (line is int or line is float) and line >= 0 and line <= 32 and line == floorf(line)
+		"hatch":
+			return state.case_status == "active" and state.package.id in ["P01", "P03"] and id in Cases.get_case(state.case_id).recipients
+		"camera_call":
+			return state.has("deferred_gleb")
 		"document":
 			return id == "clerk_identity" or id == "old_act" and state.old_act_read or state.case_status == "active" and id in state.read_documents
 		"comparison":
@@ -95,7 +106,10 @@ static func _valid_view(view: Dictionary, state: Dictionary) -> bool:
 			if not (zoom is int or zoom is float) or zoom < 0 or zoom > 6 or zoom != floorf(zoom):
 				return false
 			var detail: Variant = view.get("detail", "")
-			var details: Array = Cases.LOOSE_FINDS.get(id, Cases.get_case(state.case_id if id == state.package.id else Cases.future_case(state.case_id, id)).get("details", []))
+			var case_id: String = state.case_id if id == state.package.id else Cases.future_case(state.case_id, id)
+			if id == "P04" and state.has("deferred_gleb"):
+				case_id = "gleb"
+			var details: Array = Cases.LOOSE_FINDS.get(id, Cases.get_case(case_id).get("details", []))
 			return detail is String and (detail.is_empty() or detail in details and (detail != "zipper" or item.get("lining_lifted", false)))
 		"archive_draft":
 			return state.case_id == "finale" and state.card_location == "archive_draft"
